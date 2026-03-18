@@ -1,0 +1,10 @@
+Before working in Firebase Studio
+
+git status
+git pull --rebase origin main
+
+After editing in Firebase Studio and Before asking Codex
+
+git add .
+git commit -m "Your message here"
+git push origin main
