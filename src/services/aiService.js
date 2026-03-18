@@ -43,6 +43,7 @@ Question paper metadata: ${JSON.stringify(questionPaperMetadata)}
 `;
 
 export const recommendExercises = async (payload) => {
+  console.log('[Examify][AI] recommendExercises:start', payload);
   if (!isFirebaseConfigured) {
     return {
       recommendations: [
@@ -59,6 +60,7 @@ export const recommendExercises = async (payload) => {
 
   try {
     if (!ai) {
+      console.log('[Examify][AI] recommendExercises:fallback:no-ai-instance');
       return fallbackRecommendations;
     }
 
@@ -70,12 +72,14 @@ export const recommendExercises = async (payload) => {
     const text = stripCodeFence(result.response.text());
     const parsed = JSON.parse(text);
 
-    return {
+    const response = {
       ...parsed,
       source: 'firebase-ai-logic',
     };
+    console.log('[Examify][AI] recommendExercises:success', response);
+    return response;
   } catch (error) {
-    console.error('Examify AI recommendation error:', error);
+    console.error('[Examify][AI] recommendExercises:error', error);
     return fallbackRecommendations;
   }
 };

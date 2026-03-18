@@ -11,12 +11,12 @@ import { StudentBillingPage } from '../pages/student/StudentBillingPage';
 import { StudentProfilePage } from '../pages/student/StudentProfilePage';
 import { TutorDashboardPage } from '../pages/tutor/TutorDashboardPage';
 import { TutorStudentsPage } from '../pages/tutor/TutorStudentsPage';
-import { TutorQuestionPapersPage } from '../pages/tutor/TutorQuestionPapersPage';
 import { TutorReportsPage } from '../pages/tutor/TutorReportsPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
 import { AdminPaymentsPage } from '../pages/admin/AdminPaymentsPage';
 import { AdminSettingsPage } from '../pages/admin/AdminSettingsPage';
+import { PastExamPapersPage } from '../pages/PastExamPapersPage';
 import { ROLES } from '../lib/constants';
 
 export const AppRoutes = () => (
@@ -33,12 +33,13 @@ export const AppRoutes = () => (
       <Route path="/student/peer-reviews" element={<StudentPeerReviewsPage />} />
       <Route path="/student/billing" element={<StudentBillingPage />} />
       <Route path="/student/profile" element={<StudentProfilePage />} />
+      <Route path="/student/papers" element={<PastExamPapersPage />} />
     </Route>
 
     <Route element={<ProtectedRoute allowedRoles={[ROLES.TUTOR]} />}>
       <Route path="/tutor" element={<TutorDashboardPage />} />
       <Route path="/tutor/students" element={<TutorStudentsPage />} />
-      <Route path="/tutor/question-papers" element={<TutorQuestionPapersPage />} />
+      <Route path="/tutor/papers" element={<PastExamPapersPage />} />
       <Route path="/tutor/reports" element={<TutorReportsPage />} />
     </Route>
 
@@ -47,6 +48,7 @@ export const AppRoutes = () => (
       <Route path="/admin/users" element={<AdminUsersPage />} />
       <Route path="/admin/payments" element={<AdminPaymentsPage />} />
       <Route path="/admin/settings" element={<AdminSettingsPage />} />
+      <Route path="/admin/papers" element={<PastExamPapersPage />} />
     </Route>
 
     <Route path="*" element={<Navigate to="/" replace />} />

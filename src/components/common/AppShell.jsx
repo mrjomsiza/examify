@@ -7,6 +7,7 @@ const navigationByRole = {
   [ROLES.STUDENT]: [
     { to: '/student', label: 'Overview', icon: LayoutDashboard },
     { to: '/student/exercises', label: 'Exercises', icon: BookOpen },
+    { to: '/student/papers', label: 'Past papers', icon: BookOpen },
     { to: '/student/peer-reviews', label: 'Peer reviews', icon: ClipboardCheck },
     { to: '/student/billing', label: 'Billing', icon: CreditCard },
     { to: '/student/profile', label: 'Profile', icon: FileText },
@@ -14,12 +15,13 @@ const navigationByRole = {
   [ROLES.TUTOR]: [
     { to: '/tutor', label: 'Overview', icon: LayoutDashboard },
     { to: '/tutor/students', label: 'Students', icon: Users },
-    { to: '/tutor/question-papers', label: 'Question papers', icon: BookOpen },
+    { to: '/tutor/papers', label: 'Past papers', icon: BookOpen },
     { to: '/tutor/reports', label: 'Reports', icon: FileText },
   ],
   [ROLES.ADMIN]: [
     { to: '/admin', label: 'Overview', icon: LayoutDashboard },
     { to: '/admin/users', label: 'Users', icon: Users },
+    { to: '/admin/papers', label: 'Past papers', icon: BookOpen },
     { to: '/admin/payments', label: 'Payments', icon: CreditCard },
     { to: '/admin/settings', label: 'Settings', icon: ShieldCheck },
   ],

@@ -18,9 +18,10 @@ export const SOUTH_AFRICAN_GRADES = [
   'Grade 12',
 ];
 
-export const TERMS = ['March', 'June', 'September', 'November/December'];
+export const PAPER_MONTHS = ['March', 'June', 'September', 'December'];
 
 export const REGIONS = [
+  'National',
   'Eastern Cape',
   'Free State',
   'Gauteng',
@@ -43,3 +44,5 @@ export const SESSION_TYPE_LABELS = {
 };
 
 export const MAX_DAILY_EXERCISES = 3;
+export const WEEKLY_EXERCISE_DAYS = 7;
+export const MAX_AI_SOURCE_PAPERS = 2;

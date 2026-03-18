@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { SOUTH_AFRICAN_GRADES, REGIONS, ROLES } from '../../lib/constants';
+import { REGIONS, ROLES, SOUTH_AFRICAN_GRADES } from '../../lib/constants';
 import { useAuth } from '../../hooks/useAuth';
 
 export const SignupPage = () => {
@@ -13,6 +13,8 @@ export const SignupPage = () => {
     role: ROLES.STUDENT,
     grade: SOUTH_AFRICAN_GRADES[0],
     province: REGIONS[0],
+    previousYearMark: '0',
+    sessionType: 'online',
   });
   const [status, setStatus] = useState('');
 
@@ -20,6 +22,7 @@ export const SignupPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log('[Examify][Signup] submit:start', form);
     try {
       const result = await register({
         fullName: form.fullName,
@@ -29,10 +32,14 @@ export const SignupPage = () => {
         extraProfile: {
           grade: form.role === ROLES.STUDENT ? form.grade : null,
           province: form.role === ROLES.STUDENT ? form.province : null,
+          previousYearMark: form.role === ROLES.STUDENT ? Number(form.previousYearMark) : null,
+          sessionType: form.role === ROLES.STUDENT ? form.sessionType : null,
         },
       });
-      navigate(`/${result.profile.role}`);
+      console.log('[Examify][Signup] submit:success', result.profile);
+      navigate(result.profile.role === ROLES.STUDENT ? '/student/billing' : `/${result.profile.role}`);
     } catch (error) {
+      console.error('[Examify][Signup] submit:error', error);
       setStatus(error.message);
     }
   };
@@ -42,8 +49,8 @@ export const SignupPage = () => {
       <div className="grid w-full gap-8 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="panel-dark p-8 text-white">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200">Set up Examify</p>
-          <h1 className="mt-4 text-4xl font-bold">Sign Up</h1>
-          <p className="mt-4 text-slate-300">Create an Account for Examify.</p>
+          <h1 className="mt-4 text-4xl font-bold">Create a real starter account for the platform.</h1>
+          <p className="mt-4 text-slate-300">Students must enter their previous year’s mark manually so Examify can recommend the monthly session count before payment.</p>
         </div>
         <form onSubmit={handleSubmit} className="panel grid gap-5 p-8 md:grid-cols-2">
           <div className="md:col-span-2">
@@ -82,6 +89,17 @@ export const SignupPage = () => {
                 <span className="label">Province</span>
                 <select className="input" value={form.province} onChange={handleChange('province')}>
                   {REGIONS.map((region) => <option key={region}>{region}</option>)}
+                </select>
+              </label>
+              <label>
+                <span className="label">Previous year’s mark (%)</span>
+                <input type="number" className="input" min="0" max="100" value={form.previousYearMark} onChange={handleChange('previousYearMark')} required />
+              </label>
+              <label>
+                <span className="label">Preferred session type</span>
+                <select className="input" value={form.sessionType} onChange={handleChange('sessionType')}>
+                  <option value="online">Online</option>
+                  <option value="inPerson">In-person</option>
                 </select>
               </label>
             </>

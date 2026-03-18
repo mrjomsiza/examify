@@ -1,5 +1,5 @@
-import { formatISO, subDays, addDays } from 'date-fns';
-import { ROLES } from '../lib/constants';
+import { addDays, formatISO, subDays } from 'date-fns';
+import { PAPER_MONTHS, ROLES } from '../lib/constants';
 
 const today = new Date();
 
@@ -9,11 +9,28 @@ export const mockUsers = {
     email: 'student@example.com',
     displayName: 'Naledi Khumalo',
     role: ROLES.STUDENT,
+    previousYearMark: 62,
     latestMark: 62,
     sessionType: 'online',
     grade: 'Grade 10',
     province: 'Gauteng',
     tutorId: 'mock-tutor-1',
+    subscriptionStatus: 'active',
+    paymentCompleted: true,
+  },
+  'student2@example.com': {
+    uid: 'mock-student-2',
+    email: 'student2@example.com',
+    displayName: 'Ayanda Molefe',
+    role: ROLES.STUDENT,
+    previousYearMark: 48,
+    latestMark: 48,
+    sessionType: 'inPerson',
+    grade: 'Grade 10',
+    province: 'Gauteng',
+    tutorId: null,
+    subscriptionStatus: 'pending',
+    paymentCompleted: false,
   },
   'tutor@example.com': {
     uid: 'mock-tutor-1',
@@ -29,11 +46,63 @@ export const mockUsers = {
   },
 };
 
+export const mockQuestionPapers = [
+  {
+    id: 'qp-1',
+    subject: 'Mathematics',
+    grade: 'Grade 10',
+    year: 2023,
+    month: 'June',
+    region: 'Gauteng',
+    paperUrl: 'https://example.com/gauteng-june-2023-maths-paper.pdf',
+    memoUrl: 'https://example.com/gauteng-june-2023-maths-memo.pdf',
+    createdBy: 'mock-tutor-1',
+  },
+  {
+    id: 'qp-2',
+    subject: 'Mathematics',
+    grade: 'Grade 10',
+    year: 2022,
+    month: 'September',
+    region: 'National',
+    paperUrl: 'https://example.com/national-september-2022-maths-paper.pdf',
+    memoUrl: '',
+    createdBy: 'mock-admin-1',
+  },
+];
+
+export const mockTutorReports = [
+  {
+    id: 'r-1',
+    studentId: 'mock-student-1',
+    tutorId: 'mock-tutor-1',
+    studentName: 'Naledi Khumalo',
+    note: 'Confidence improving; assign mixed factorisation questions next week.',
+    updatedAt: '2026-03-15T10:00:00.000Z',
+  },
+];
+
+export const mockCompletedLessons = [
+  {
+    id: 'lesson-1',
+    studentId: 'mock-student-1',
+    tutorId: 'mock-tutor-1',
+    topic: 'Factorisation of trinomials',
+    topicReport: 'Learner can factorise with some prompting and should revise sign handling.',
+    understandingLevel: 6,
+    completedOn: '2026-03-12',
+  },
+];
+
+export const mockStudentAssignments = [
+  { studentId: 'mock-student-1', tutorId: 'mock-tutor-1', active: true },
+];
+
 export const mockDashboardData = {
   student: {
     stats: [
       { label: 'Average mark', value: '62%', detail: 'Last 4 exercises' },
-      { label: 'Completed topics', value: '8', detail: 'Tutor confirmed' },
+      { label: 'Completed topics', value: '1', detail: 'Tutor confirmed' },
       { label: 'Peer reviews', value: '3', detail: 'Awaiting 1' },
       { label: 'Subscription', value: 'Active', detail: 'Renews monthly' },
     ],
@@ -79,50 +148,41 @@ export const mockDashboardData = {
       peerReviewSubmitted: false,
     },
     progress: [
-      { topic: 'Number patterns', mark: 55 },
-      { topic: 'Algebraic expressions', mark: 68 },
-      { topic: 'Factorisation', mark: 62 },
-      { topic: 'Functions', mark: 71 },
+      { topic: 'Factorisation of trinomials', mark: 62 },
     ],
     feedback: [
       { id: 'fb-1', title: 'Tutor note', message: 'Focus on checking sign changes in factorisation.' },
-      { id: 'fb-2', title: 'Peer note', message: 'Good working steps. Watch the final simplification.' },
     ],
   },
   tutor: {
     stats: [
-      { label: 'Assigned students', value: '12', detail: 'All Maths only' },
-      { label: 'Submissions to review', value: '7', detail: 'Today' },
-      { label: 'Question papers', value: '18', detail: 'Published' },
-      { label: 'Reports due', value: '4', detail: 'This week' },
+      { label: 'Assigned students', value: '1', detail: 'All Maths only' },
+      { label: 'Unassigned students', value: '1', detail: 'Ready to add' },
+      { label: 'Question papers', value: String(mockQuestionPapers.length), detail: 'Published' },
+      { label: 'Reports due', value: '1', detail: 'This week' },
     ],
     students: [
-      { id: 'mock-student-1', name: 'Naledi Khumalo', grade: 'Grade 10', latestMark: 62, province: 'Gauteng' },
-      { id: 'mock-student-2', name: 'Ayanda Molefe', grade: 'Grade 10', latestMark: 48, province: 'Gauteng' },
+      { id: 'mock-student-1', name: 'Naledi Khumalo', grade: 'Grade 10', latestMark: 62, province: 'Gauteng', paymentCompleted: true },
     ],
-    completedTopics: [
-      { id: 'ct-1', studentName: 'Naledi Khumalo', topic: 'Factorisation of trinomials', completedOn: '2026-03-12' },
-      { id: 'ct-2', studentName: 'Naledi Khumalo', topic: 'Linear equations', completedOn: '2026-03-07' },
+    unassignedStudents: [
+      { id: 'mock-student-2', name: 'Ayanda Molefe', grade: 'Grade 10', latestMark: 48, province: 'Gauteng', paymentCompleted: false },
     ],
-    reports: [
-      { id: 'r-1', studentName: 'Naledi Khumalo', note: 'Confidence improving; assign mixed factorisation questions next week.' },
-    ],
-    questionPapers: [
-      { id: 'qp-1', title: 'Grade 10 Gauteng June 2023', year: 2023, term: 'June', region: 'Gauteng' },
-    ],
+    completedTopics: mockCompletedLessons,
+    reports: mockTutorReports,
+    questionPapers: mockQuestionPapers,
   },
   admin: {
     stats: [
-      { label: 'Active students', value: '128', detail: 'Paying subscribers' },
-      { label: 'Active tutors', value: '16', detail: 'Maths tutors' },
-      { label: 'Monthly revenue', value: '$842', detail: 'Projected' },
-      { label: 'Platform alerts', value: '2', detail: 'Require review' },
+      { label: 'Active students', value: '2', detail: '1 has paid' },
+      { label: 'Active tutors', value: '1', detail: 'Maths tutors' },
+      { label: 'Monthly revenue', value: '$4.40', detail: 'Projected' },
+      { label: 'Platform alerts', value: '0', detail: 'All clear' },
     ],
     payments: [
-      { id: 'pay-1', studentName: 'Naledi Khumalo', amount: '$4.40', status: 'Paid', month: 'March 2026' },
+      { id: 'pay-1', studentName: 'Naledi Khumalo', amount: '$4.40', status: 'Paid', month: `${PAPER_MONTHS[0]} 2026` },
     ],
     tutors: [
-      { id: 'mock-tutor-1', name: 'Mr. Dlamini', students: 12, province: 'Gauteng' },
+      { id: 'mock-tutor-1', name: 'Mr. Dlamini', students: 1, province: 'Gauteng' },
     ],
   },
 };

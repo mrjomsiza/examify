@@ -104,8 +104,8 @@ export const LandingPage = () => (
             <p className="font-semibold">Session pricing</p>
           </div>
           <ul className="mt-5 space-y-4 text-sm text-slate-600">
-            <li className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span>Online session</span><strong>R{SESSION_PRICING.online.toFixed(2)}</strong></li>
-            <li className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span>In-person session</span><strong>R{SESSION_PRICING.inPerson.toFixed(2)}</strong></li>
+            <li className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span>Online session</span><strong>${SESSION_PRICING.online.toFixed(2)}</strong></li>
+            <li className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span>In-person session</span><strong>${SESSION_PRICING.inPerson.toFixed(2)}</strong></li>
           </ul>
         </div>
         <div className="panel p-6">

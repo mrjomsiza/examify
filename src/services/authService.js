@@ -6,14 +6,16 @@ import {
   signOut,
   updateProfile,
 } from 'firebase/auth';
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../firebase/config';
 import { collections } from '../firebase/schema';
 import { mockUsers } from '../data/mockData';
 
 const provider = isFirebaseConfigured ? new GoogleAuthProvider() : null;
+const logStage = (stage, payload = {}) => console.log(`[Examify][Auth] ${stage}`, payload);
 
 export const loginWithEmail = async ({ email, password }) => {
+  logStage('loginWithEmail:start', { email });
   if (!isFirebaseConfigured) {
     const mockUser = mockUsers[email];
     if (!mockUser) throw new Error('Demo account not found. Try student@example.com, tutor@example.com, or admin@example.com.');
@@ -26,6 +28,17 @@ export const loginWithEmail = async ({ email, password }) => {
 };
 
 export const registerWithEmail = async ({ fullName, email, password, role, extraProfile = {} }) => {
+  logStage('registerWithEmail:start', { email, role });
+  const studentDefaults = role === 'student'
+    ? {
+      previousYearMark: Number(extraProfile.previousYearMark ?? 0),
+      latestMark: Number(extraProfile.previousYearMark ?? 0),
+      paymentCompleted: false,
+      subscriptionStatus: 'pending',
+      subject: 'Mathematics',
+    }
+    : {};
+
   if (!isFirebaseConfigured) {
     return {
       user: {
@@ -33,7 +46,7 @@ export const registerWithEmail = async ({ fullName, email, password, role, extra
         email,
         displayName: fullName,
       },
-      profile: { uid: 'demo-new-user', email, displayName: fullName, role, ...extraProfile },
+      profile: { uid: 'demo-new-user', email, displayName: fullName, role, ...studentDefaults, ...extraProfile },
       mock: true,
     };
   }
@@ -48,11 +61,48 @@ export const registerWithEmail = async ({ fullName, email, password, role, extra
     role,
     subject: 'Mathematics',
     createdAt: serverTimestamp(),
+    ...studentDefaults,
     ...extraProfile,
   };
 
   await setDoc(doc(db, collections.users, credential.user.uid), profile);
   return { user: credential.user, profile };
+};
+
+export const updateStudentOnboarding = async ({ uid, previousYearMark, sessionType }) => {
+  logStage('updateStudentOnboarding:start', { uid, previousYearMark, sessionType });
+  if (!isFirebaseConfigured) {
+    return { uid, previousYearMark, latestMark: previousYearMark, sessionType, paymentCompleted: false, subscriptionStatus: 'pending' };
+  }
+
+  const payload = {
+    previousYearMark: Number(previousYearMark),
+    latestMark: Number(previousYearMark),
+    sessionType,
+    paymentCompleted: false,
+    subscriptionStatus: 'pending',
+    updatedAt: serverTimestamp(),
+  };
+
+  await updateDoc(doc(db, collections.users, uid), payload);
+  return { uid, ...payload };
+};
+
+export const markStudentPaymentComplete = async ({ uid, reference }) => {
+  logStage('markStudentPaymentComplete:start', { uid, reference });
+  if (!isFirebaseConfigured) {
+    return { uid, paymentCompleted: true, subscriptionStatus: 'active', latestPaymentReference: reference };
+  }
+
+  const payload = {
+    paymentCompleted: true,
+    subscriptionStatus: 'active',
+    latestPaymentReference: reference,
+    updatedAt: serverTimestamp(),
+  };
+
+  await updateDoc(doc(db, collections.users, uid), payload);
+  return { uid, ...payload };
 };
 
 export const signInWithGoogle = async () => {

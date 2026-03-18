@@ -2,22 +2,30 @@ import { useEffect, useState } from 'react';
 import { AppShell } from '../../components/common/AppShell';
 import { SectionHeader } from '../../components/common/SectionHeader';
 import { useAuth } from '../../hooks/useAuth';
-import { getExerciseHistory, getTodayExercise } from '../../services/firestoreService';
+import { getExerciseHistory, getStudentAccessState, getTodayExercise } from '../../services/firestoreService';
 import { getExerciseAvailability } from '../../utils/exerciseRules';
 
 export const StudentExercisesPage = () => {
   const { profile, logout } = useAuth();
   const [todayExercise, setTodayExercise] = useState(null);
   const [history, setHistory] = useState([]);
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
 
   useEffect(() => {
-    getTodayExercise(profile?.uid).then(setTodayExercise);
-    getExerciseHistory(profile?.uid).then(setHistory);
+    const load = async () => {
+      const access = await getStudentAccessState(profile);
+      setPaymentCompleted(access.paymentCompleted);
+      if (!access.paymentCompleted) return;
+      getTodayExercise(profile?.uid).then(setTodayExercise);
+      getExerciseHistory(profile?.uid).then(setHistory);
+    };
+    load();
   }, [profile]);
 
   return (
     <AppShell title="Exercises" subtitle="Review today’s task and browse your Maths assignment timeline." role="student" user={profile} onLogout={logout}>
-      <SectionHeader eyebrow="Today" title={todayExercise?.title ?? 'Loading…'} description={todayExercise?.instruction} />
+      {!paymentCompleted ? <div className="panel p-5 text-sm text-amber-700">Payment is required before exercises unlock.</div> : null}
+      <SectionHeader eyebrow="Today" title={todayExercise?.title ?? 'Waiting for today\'s assignment'} description={todayExercise?.instruction ?? 'Once payment and generation criteria are complete, today’s exercise will appear here.'} />
       <div className="grid gap-4">
         {history.map((exercise) => {
           const availability = getExerciseAvailability(exercise.assignmentDate, exercise.submitted);

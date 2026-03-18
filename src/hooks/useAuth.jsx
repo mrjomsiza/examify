@@ -1,13 +1,28 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '../firebase/config';
-import { getUserProfile, loginWithEmail, logout, registerWithEmail, signInWithGoogle } from '../services/authService';
+import {
+  getUserProfile,
+  loginWithEmail,
+  logout,
+  markStudentPaymentComplete,
+  registerWithEmail,
+  signInWithGoogle,
+  updateStudentOnboarding,
+} from '../services/authService';
 import { mockUsers } from '../data/mockData';
 
 const AuthContext = createContext(null);
+const logStage = (stage, payload = {}) => console.log(`[Examify][AuthProvider] ${stage}`, payload);
 
 export const AuthProvider = ({ children }) => {
   const [state, setState] = useState({ user: null, profile: null, loading: true, error: null });
+
+  const refreshProfile = async (uid, userOverride = null) => {
+    const profile = await getUserProfile(uid);
+    setState((current) => ({ ...current, user: userOverride ?? current.user, profile, loading: false, error: null }));
+    return profile;
+  };
 
   useEffect(() => {
     if (!isFirebaseConfigured) {
@@ -16,6 +31,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      logStage('onAuthStateChanged', { uid: firebaseUser?.uid ?? null });
       if (!firebaseUser) {
         setState({ user: null, profile: null, loading: false, error: null });
         return;
@@ -31,6 +47,7 @@ export const AuthProvider = ({ children }) => {
   const value = useMemo(() => ({
     ...state,
     isDemoMode: !isFirebaseConfigured,
+    refreshProfile,
     login: async (payload) => {
       const result = await loginWithEmail(payload);
       setState({ user: result.user, profile: result.profile, loading: false, error: null });
@@ -40,6 +57,22 @@ export const AuthProvider = ({ children }) => {
       const result = await registerWithEmail(payload);
       setState({ user: result.user, profile: result.profile, loading: false, error: null });
       return result;
+    },
+    updateStudentOnboarding: async (payload) => {
+      const updated = await updateStudentOnboarding(payload);
+      setState((current) => ({
+        ...current,
+        profile: { ...current.profile, ...updated },
+      }));
+      return updated;
+    },
+    markStudentPaymentComplete: async (payload) => {
+      const updated = await markStudentPaymentComplete(payload);
+      setState((current) => ({
+        ...current,
+        profile: { ...current.profile, ...updated },
+      }));
+      return updated;
     },
     loginAsDemo: async (email) => {
       const mockUser = mockUsers[email];
