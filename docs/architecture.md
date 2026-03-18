@@ -7,7 +7,8 @@
 - Demo-mode fallbacks keep the app runnable before credentials are configured.
 
 ## Backend
-- Firebase Cloud Functions provide secure Paystack initialization, verification, stored-authorization charging, and Gemini exercise recommendations.
+- Firebase Cloud Functions provide secure Paystack initialization, verification, and stored-authorization charging.
+- Firebase AI Logic provides Gemini-powered exercise recommendations from the web app through the shared Firebase client configuration.
 - Firestore stores users, tutor assignments, covered topics, question papers, subscriptions, payments, submissions, tutor reports, and peer reviews.
 - Firebase Storage stores uploaded image submissions.
 

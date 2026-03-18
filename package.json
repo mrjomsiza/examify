@@ -12,7 +12,6 @@
     "functions:lint": "cd functions && npm run lint"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "firebase": "^11.6.0",
