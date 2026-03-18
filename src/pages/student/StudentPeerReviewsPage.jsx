@@ -13,9 +13,14 @@ export const StudentPeerReviewsPage = () => {
   useEffect(() => {
     const load = async () => {
       const data = await getRoleDashboardData('student');
-      setAssignment(data.peerReviewAssignment);
-      const result = await getSubmissionById(data.peerReviewAssignment.submissionId);
-      setSubmission(result);
+      const peerAssignment = data.peerReviewAssignment ?? null;
+      setAssignment(peerAssignment);
+      if (peerAssignment?.submissionId) {
+        const result = await getSubmissionById(peerAssignment.submissionId);
+        setSubmission(result);
+      } else {
+        setSubmission(null);
+      }
     };
     load();
   }, []);

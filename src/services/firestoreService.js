@@ -16,13 +16,36 @@ import { db, isFirebaseConfigured } from '../firebase/config';
 import { collections } from '../firebase/schema';
 import { mockDashboardData } from '../data/mockData';
 
+const emptyDashboardData = {
+  student: {
+    stats: [],
+    todayExercise: null,
+    exerciseHistory: [],
+    peerReviewAssignment: null,
+    progress: [],
+    feedback: [],
+  },
+  tutor: {
+    stats: [],
+    students: [],
+    completedTopics: [],
+    reports: [],
+    questionPapers: [],
+  },
+  admin: {
+    stats: [],
+    payments: [],
+    tutors: [],
+  },
+};
+
 const ensureDb = () => {
   if (!db) throw new Error('Firebase is not configured. Add VITE_FIREBASE_* variables to use live data.');
 };
 
 export const getRoleDashboardData = async (role) => {
   if (!isFirebaseConfigured) return mockDashboardData[role];
-  return { stats: [] };
+  return emptyDashboardData[role] ?? { stats: [] };
 };
 
 export const getTodayExercise = async (studentId) => {

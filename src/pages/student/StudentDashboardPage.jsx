@@ -18,20 +18,30 @@ export const StudentDashboardPage = () => {
   const [history, setHistory] = useState([]);
   const [aiRecommendations, setAiRecommendations] = useState([]);
   const [paymentStatus, setPaymentStatus] = useState('');
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     const load = async () => {
-      const data = await getRoleDashboardData('student');
-      setDashboard(data);
-      const exerciseHistory = await getExerciseHistory(profile?.uid);
-      setHistory(exerciseHistory);
-      const ai = await recommendExercises({
-        studentId: profile?.uid,
-        grade: profile?.grade,
-        region: profile?.province,
-        latestMark: profile?.latestMark,
-      });
-      setAiRecommendations(ai.recommendations ?? []);
+      try {
+        const data = await getRoleDashboardData('student');
+        setDashboard(data);
+        const exerciseHistory = await getExerciseHistory(profile?.uid);
+        setHistory(exerciseHistory);
+        const ai = await recommendExercises({
+          studentId: profile?.uid,
+          grade: profile?.grade,
+          region: profile?.province,
+          latestMark: profile?.latestMark,
+        });
+        setAiRecommendations(ai.recommendations ?? []);
+        setLoadError('');
+      } catch (error) {
+        console.error('Student dashboard load error:', error);
+        setDashboard((current) => current ?? { stats: [], todayExercise: null, feedback: [], peerReviewAssignment: null });
+        setHistory([]);
+        setAiRecommendations([]);
+        setLoadError('Some student dashboard data could not be loaded yet. Check Firebase setup and seeded records.');
+      }
     };
 
     load();
@@ -43,9 +53,9 @@ export const StudentDashboardPage = () => {
     [profile],
   );
 
-  if (!dashboard || !todayExercise) return null;
+  if (!dashboard) return null;
 
-  const availability = getExerciseAvailability(todayExercise.assignmentDate, false);
+  const availability = todayExercise ? getExerciseAvailability(todayExercise.assignmentDate, false) : null;
 
   return (
     <AppShell
@@ -56,11 +66,19 @@ export const StudentDashboardPage = () => {
       onLogout={logout}
     >
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {dashboard.stats.map((item) => <StatCard key={item.label} {...item} />)}
+        {(dashboard.stats ?? []).map((item) => <StatCard key={item.label} {...item} />)}
       </section>
 
+      {loadError ? <div className="panel p-4 text-sm text-amber-700">{loadError}</div> : null}
+
       <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <ExerciseCard exercise={todayExercise} availability={availability} onUploadClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })} />
+        {todayExercise && availability ? (
+          <ExerciseCard exercise={todayExercise} availability={availability} onUploadClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })} />
+        ) : (
+          <div className="panel flex min-h-72 items-center justify-center p-6 text-center text-sm text-slate-500">
+            No exercise has been assigned for today yet. Once tutor-approved work is scheduled, it will appear here.
+          </div>
+        )}
         <div className="panel p-6">
           <div className="flex items-center gap-3 text-brand-700">
             <Sparkles className="h-5 w-5" />
@@ -139,20 +157,26 @@ export const StudentDashboardPage = () => {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-        <SubmissionUpload
-          exerciseId={todayExercise.id}
-          onSubmit={({ file, exerciseId }) => uploadSubmissionImage({ file, exerciseId, studentId: profile?.uid })}
-        />
+        {todayExercise ? (
+          <SubmissionUpload
+            exerciseId={todayExercise.id}
+            onSubmit={({ file, exerciseId }) => uploadSubmissionImage({ file, exerciseId, studentId: profile?.uid })}
+          />
+        ) : (
+          <div className="panel flex min-h-56 items-center justify-center p-6 text-center text-sm text-slate-500">
+            Uploads will unlock once today’s exercise has been assigned.
+          </div>
+        )}
         <div className="panel space-y-4 p-6">
           <h3 className="text-xl font-semibold text-slate-950">Feedback loop</h3>
-          {dashboard.feedback.map((item) => (
+          {(dashboard.feedback ?? []).map((item) => (
             <div key={item.id} className="rounded-2xl bg-slate-50 p-4">
               <p className="font-semibold text-slate-900">{item.title}</p>
               <p className="mt-2 text-sm text-slate-600">{item.message}</p>
             </div>
           ))}
           <div className="rounded-2xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
-            Peer review unlocked: {String(canSubmitPeerReview(dashboard.peerReviewAssignment))}
+            Peer review unlocked: {String(canSubmitPeerReview(dashboard.peerReviewAssignment ?? {}))}
           </div>
         </div>
       </section>

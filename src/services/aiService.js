@@ -2,6 +2,17 @@ import { getGenerativeModel } from 'firebase/ai';
 import { ai, firebaseAiModel, isFirebaseConfigured } from '../firebase/config';
 
 const stripCodeFence = (text) => text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '').trim();
+const fallbackRecommendations = {
+  recommendations: [
+    {
+      title: 'Awaiting AI recommendation',
+      topic: 'Tutor-completed Mathematics topic',
+      reason: 'Firebase AI Logic is temporarily unavailable, so Examify is showing a safe fallback recommendation state.',
+      sourceLabel: 'Retry after confirming Firebase AI Logic is enabled for this project.',
+    },
+  ],
+  source: 'fallback',
+};
 
 const buildPrompt = ({
   grade,
@@ -46,16 +57,25 @@ export const recommendExercises = async (payload) => {
     };
   }
 
-  const model = getGenerativeModel(ai, {
-    model: firebaseAiModel,
-  });
+  try {
+    if (!ai) {
+      return fallbackRecommendations;
+    }
 
-  const result = await model.generateContent(buildPrompt(payload));
-  const text = stripCodeFence(result.response.text());
-  const parsed = JSON.parse(text);
+    const model = getGenerativeModel(ai, {
+      model: firebaseAiModel,
+    });
 
-  return {
-    ...parsed,
-    source: 'firebase-ai-logic',
-  };
+    const result = await model.generateContent(buildPrompt(payload));
+    const text = stripCodeFence(result.response.text());
+    const parsed = JSON.parse(text);
+
+    return {
+      ...parsed,
+      source: 'firebase-ai-logic',
+    };
+  } catch (error) {
+    console.error('Examify AI recommendation error:', error);
+    return fallbackRecommendations;
+  }
 };

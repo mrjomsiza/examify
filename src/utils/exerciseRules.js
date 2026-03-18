@@ -27,5 +27,6 @@ export const getExerciseAvailability = (assignmentDate, hasSubmission) => {
 export const canOpenExercise = (assignmentDate) => isSameDay(startOfDay(new Date(assignmentDate)), startOfDay(new Date()));
 
 export const canSubmitPeerReview = ({ ownSubmissionComplete, peerReviewSubmitted, assignmentDate }) => {
+  if (!assignmentDate) return false;
   return ownSubmissionComplete && !peerReviewSubmitted && !isBefore(startOfDay(new Date()), startOfDay(new Date(assignmentDate)));
 };

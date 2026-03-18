@@ -16,13 +16,14 @@ export const TutorStudentsPage = () => {
     <AppShell title="Students" subtitle="See assigned learner performance and tutor-owned context." role="tutor" user={profile} onLogout={logout}>
       <SectionHeader eyebrow="Roster" title="Tutor students" description="Students stay scoped to their assigned tutor in the dashboard experience." />
       <div className="grid gap-4">
-        {dashboard?.students.map((student) => (
+        {(dashboard?.students ?? []).map((student) => (
           <div key={student.id} className="panel p-5">
             <p className="text-lg font-semibold text-slate-950">{student.name}</p>
             <p className="mt-1 text-sm text-slate-500">{student.grade} • {student.province}</p>
             <p className="mt-3 text-sm text-slate-600">Latest mark: {student.latestMark}%</p>
           </div>
         ))}
+        {!dashboard?.students?.length ? <div className="panel p-5 text-sm text-slate-500">No tutor students have been assigned yet.</div> : null}
       </div>
     </AppShell>
   );
