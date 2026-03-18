@@ -134,7 +134,7 @@ export const StudentDashboardPage = () => {
             </div>
             <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 text-sm">
               <span>Estimated amount</span>
-              <strong>${quote.amount.toFixed(2)}</strong>
+              <strong>R{quote.amount.toFixed(2)}</strong>
             </div>
             <button
               type="button"
