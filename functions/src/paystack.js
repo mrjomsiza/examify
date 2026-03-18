@@ -3,13 +3,13 @@ import { db, admin } from './admin.js';
 import { functionConfig } from './config.js';
 
 const sessionPricing = {
-  online: 2.2,
-  inPerson: 2.5,
+  online: 220,
+  inPerson: 250,
 };
 
 const getRecommendedSessionCount = (latestMark = 0) => {
   if (latestMark <= 50) return 4;
-  if (latestMark < 70) return 2;
+  if (latestMark <= 70) return 2;
   return 1;
 };
 
@@ -59,7 +59,7 @@ export const initializePaystackTransaction = onCall(async (request) => {
   const transaction = await paystackRequest('/transaction/initialize', {
     email,
     amount: Math.round(quote.amount * 100),
-    currency: 'USD',
+    currency: 'ZAR',
     reference,
     callback_url: functionConfig.paystackCallbackUrl,
     metadata: {
@@ -76,7 +76,7 @@ export const initializePaystackTransaction = onCall(async (request) => {
     studentId,
     email,
     amount: quote.amount,
-    currency: 'USD',
+    currency: 'ZAR',
     sessionType: quote.sessionType,
     sessionCount: quote.sessionCount,
     status: 'initialized',
@@ -188,7 +188,7 @@ export const chargeStoredAuthorization = onCall(async (request) => {
     studentId,
     email,
     amount,
-    currency: 'USD',
+    currency: 'ZAR',
     status: charge.status ?? 'processing',
     recurring: true,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
