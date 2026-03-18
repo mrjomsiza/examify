@@ -34,8 +34,8 @@ export const REGIONS = [
 ];
 
 export const SESSION_PRICING = {
-  online: 2.2,
-  inPerson: 2.5,
+  online: 220,
+  inPerson: 250,
 };
 
 export const SESSION_TYPE_LABELS = {
