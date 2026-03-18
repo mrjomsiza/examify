@@ -31,8 +31,7 @@ export const LoginPage = () => {
       <div className="grid w-full gap-8 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="panel-dark p-8 text-white">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200">Access Examify</p>
-          <h1 className="mt-4 text-4xl font-bold">Continue learning, teaching, or managing.</h1>
-          <p className="mt-4 text-slate-300">Use Firebase Auth credentials in production, or use the included demo accounts to explore the role-based dashboards immediately.</p>
+          <h1 className="mt-4 text-4xl font-bold">Welcome to Examify.</h1>
           <div className="mt-8 space-y-3">
             {demoAccounts.map((account) => (
               <button key={account.email} type="button" onClick={() => loginAsDemo(account.email).then((profile) => redirectByRole(profile.role))} className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm hover:border-brand-400/50">

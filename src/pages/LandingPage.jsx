@@ -27,10 +27,8 @@ const features = [
 ];
 
 const benefits = [
-  'Mathematics-only focus for South African grades.',
-  'Question papers with grade, year, term, and region metadata.',
-  'Secure Firebase auth, Firestore, Storage, and Cloud Functions foundation.',
-  'Paystack subscription billing with stored authorization for future recurring charges.',
+  'Be exam ready.',
+  'Question papers focused learning tailored for you.',
 ];
 
 export const LandingPage = () => (
@@ -106,18 +104,17 @@ export const LandingPage = () => (
             <p className="font-semibold">Session pricing</p>
           </div>
           <ul className="mt-5 space-y-4 text-sm text-slate-600">
-            <li className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span>Online session</span><strong>${SESSION_PRICING.online.toFixed(2)}</strong></li>
-            <li className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span>In-person session</span><strong>${SESSION_PRICING.inPerson.toFixed(2)}</strong></li>
+            <li className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span>Online session</span><strong>R{SESSION_PRICING.online.toFixed(2)}</strong></li>
+            <li className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span>In-person session</span><strong>R{SESSION_PRICING.inPerson.toFixed(2)}</strong></li>
           </ul>
         </div>
         <div className="panel p-6">
           <p className="text-lg font-semibold text-slate-950">Recommended monthly sessions</p>
           <ul className="mt-5 space-y-3 text-sm text-slate-600">
             <li>0% to 50% inclusive → 4 sessions</li>
-            <li>Above 50% and below 70% → 2 sessions</li>
-            <li>70% and above → 1 session</li>
+            <li>Above 50% and below 70% inclusive → 2 sessions</li>
+            <li>Above 70% → 1 session</li>
           </ul>
-          <p className="mt-4 text-sm text-slate-500">Billing is initialized and verified in Firebase Cloud Functions, while recurring authorization tokens are stored securely for future renewals.</p>
         </div>
       </div>
     </LandingSection>
