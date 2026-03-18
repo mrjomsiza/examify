@@ -1,0 +1,54 @@
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { MarketingLayout } from '../layouts/MarketingLayout';
+import { ProtectedRoute } from '../components/common/ProtectedRoute';
+import { LandingPage } from '../pages/LandingPage';
+import { LoginPage } from '../pages/auth/LoginPage';
+import { SignupPage } from '../pages/auth/SignupPage';
+import { StudentDashboardPage } from '../pages/student/StudentDashboardPage';
+import { StudentExercisesPage } from '../pages/student/StudentExercisesPage';
+import { StudentPeerReviewsPage } from '../pages/student/StudentPeerReviewsPage';
+import { StudentBillingPage } from '../pages/student/StudentBillingPage';
+import { StudentProfilePage } from '../pages/student/StudentProfilePage';
+import { TutorDashboardPage } from '../pages/tutor/TutorDashboardPage';
+import { TutorStudentsPage } from '../pages/tutor/TutorStudentsPage';
+import { TutorQuestionPapersPage } from '../pages/tutor/TutorQuestionPapersPage';
+import { TutorReportsPage } from '../pages/tutor/TutorReportsPage';
+import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
+import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
+import { AdminPaymentsPage } from '../pages/admin/AdminPaymentsPage';
+import { AdminSettingsPage } from '../pages/admin/AdminSettingsPage';
+import { ROLES } from '../lib/constants';
+
+export const AppRoutes = () => (
+  <Routes>
+    <Route element={<MarketingLayout />}>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+    </Route>
+
+    <Route element={<ProtectedRoute allowedRoles={[ROLES.STUDENT]} />}>
+      <Route path="/student" element={<StudentDashboardPage />} />
+      <Route path="/student/exercises" element={<StudentExercisesPage />} />
+      <Route path="/student/peer-reviews" element={<StudentPeerReviewsPage />} />
+      <Route path="/student/billing" element={<StudentBillingPage />} />
+      <Route path="/student/profile" element={<StudentProfilePage />} />
+    </Route>
+
+    <Route element={<ProtectedRoute allowedRoles={[ROLES.TUTOR]} />}>
+      <Route path="/tutor" element={<TutorDashboardPage />} />
+      <Route path="/tutor/students" element={<TutorStudentsPage />} />
+      <Route path="/tutor/question-papers" element={<TutorQuestionPapersPage />} />
+      <Route path="/tutor/reports" element={<TutorReportsPage />} />
+    </Route>
+
+    <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]} />}>
+      <Route path="/admin" element={<AdminDashboardPage />} />
+      <Route path="/admin/users" element={<AdminUsersPage />} />
+      <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+      <Route path="/admin/settings" element={<AdminSettingsPage />} />
+    </Route>
+
+    <Route path="*" element={<Navigate to="/" replace />} />
+  </Routes>
+);
