@@ -42,8 +42,8 @@ export const SignupPage = () => {
       <div className="grid w-full gap-8 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="panel-dark p-8 text-white">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200">Set up Examify</p>
-          <h1 className="mt-4 text-4xl font-bold">Create a real starter account for the platform.</h1>
-          <p className="mt-4 text-slate-300">Student accounts can later activate Paystack subscriptions, tutors manage Maths-only learners, and admins monitor the full platform.</p>
+          <h1 className="mt-4 text-4xl font-bold">Sign Up</h1>
+          <p className="mt-4 text-slate-300">Create an Account for Examify.</p>
         </div>
         <form onSubmit={handleSubmit} className="panel grid gap-5 p-8 md:grid-cols-2">
           <div className="md:col-span-2">

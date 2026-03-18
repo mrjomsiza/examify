@@ -2,7 +2,7 @@ import { SESSION_PRICING } from '../lib/constants';
 
 export const getRecommendedSessionCount = (latestMark = 0) => {
   if (latestMark <= 50) return 4;
-  if (latestMark < 70) return 2;
+  if (latestMark <= 70) return 2;
   return 1;
 };
 
