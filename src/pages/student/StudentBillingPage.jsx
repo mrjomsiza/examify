@@ -54,7 +54,7 @@ export const StudentBillingPage = () => {
         <div className="panel p-5"><p className="text-sm text-slate-500">Session type</p><p className="mt-2 text-2xl font-bold text-slate-950">{SESSION_TYPE_LABELS[quote.sessionType]}</p></div>
         <div className="panel p-5"><p className="text-sm text-slate-500">Previous year mark</p><p className="mt-2 text-2xl font-bold text-slate-950">{profile?.previousYearMark ?? 0}%</p></div>
         <div className="panel p-5"><p className="text-sm text-slate-500">Recommended sessions</p><p className="mt-2 text-2xl font-bold text-slate-950">{quote.sessionCount}</p></div>
-        <div className="panel p-5"><p className="text-sm text-slate-500">Monthly amount</p><p className="mt-2 text-2xl font-bold text-slate-950">${quote.amount.toFixed(2)}</p></div>
+        <div className="panel p-5"><p className="text-sm text-slate-500">Monthly amount</p><p className="mt-2 text-2xl font-bold text-slate-950">R{quote.amount.toFixed(2)}</p></div>
       </div>
       <div className="panel mt-6 space-y-4 p-5 text-sm leading-7 text-slate-600">
         <p>Students are sent here immediately after signup. Lessons and exercises remain locked until payment is completed.</p>

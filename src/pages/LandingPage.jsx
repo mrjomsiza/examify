@@ -1,7 +1,8 @@
 import { ArrowRight, BookOpen, BrainCircuit, CheckCircle2, CreditCard, ShieldCheck, Users } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { LandingSection } from '../components/landing/LandingSection';
 import { SESSION_PRICING } from '../lib/constants';
+import { useAuth } from '../hooks/useAuth';
 
 const features = [
   {
@@ -31,18 +32,23 @@ const benefits = [
   'Question papers focused learning tailored for you.',
 ];
 
-export const LandingPage = () => (
-  <>
-    <section className="mx-auto max-w-7xl px-4 pb-24 pt-20 lg:px-6 lg:pt-24">
-      <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
-        <div>
+export const LandingPage = () => {
+  const { profile } = useAuth();
+
+  if (profile?.role) return <Navigate to={`/${profile.role}`} replace />;
+
+  return (
+    <>
+      <section className="mx-auto max-w-7xl px-4 pb-24 pt-20 lg:px-6 lg:pt-24">
+        <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="panel-dark p-8 md:p-10 backdrop-blur-xl border-white/20 shadow-[0_20px_50px_-5px_rgba(0,0,0,0.5)]">
           <div className="inline-flex items-center gap-2 rounded-full border border-brand-400/30 bg-brand-500/10 px-4 py-2 text-sm font-semibold text-brand-200">
             70-20-10 Maths learning for South African students
           </div>
-          <h1 className="mt-6 text-5xl font-bold tracking-tight text-white md:text-6xl">Structured daily Maths practice, guided by tutors and powered by AI.</h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            Examify helps students stay on track with tutor-approved daily exercises, peer marking, paper-based answer uploads, and subscription billing designed around the support they actually need.
-          </p>
+            <h1 className="mt-6 text-5xl font-bold tracking-tight text-white md:text-6xl drop-shadow-lg">Structured daily Maths practice, guided by tutors and powered by AI.</h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 drop-shadow">
+              Examify helps students stay on track with tutor-approved daily exercises, peer marking, paper-based answer uploads, and subscription billing designed around the support they actually need.
+            </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link to="/signup" className="btn-primary gap-2">
               Create account
@@ -59,23 +65,35 @@ export const LandingPage = () => (
             ))}
           </div>
         </div>
-        <div className="panel-dark p-8 text-white">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200">Why it works</p>
-          <div className="mt-6 space-y-5">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <p className="text-4xl font-bold">70%</p>
-              <p className="mt-2 text-lg font-semibold">Daily exercise practice</p>
-              <p className="mt-2 text-sm text-slate-300">Only today’s exercise is open, and it is always built from topics the tutor has already marked as completed.</p>
+        <div className="perspective-1000 relative flex flex-col items-center justify-center pt-8 pb-32 lg:pb-0 lg:pl-10 min-h-[500px]">
+          {/* TEACHING METHOD EYEBROW */}
+          <div className="w-full text-center lg:text-left mb-12 z-40">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200 drop-shadow-md">Teaching Method</p>
+          </div>
+
+          {/* Main 3D background glow */}
+          <div className="animate-glow absolute inset-0 rounded-full mt-12 bg-brand-500/20 mix-blend-screen blur-[100px]" />
+          
+          <div className="preserve-3d relative w-full max-w-sm h-full">
+            {/* 70% Card */}
+            <div className="animate-float-fast absolute top-0 left-0 z-30 w-full rounded-3xl border border-white/30 bg-white/10 p-6 backdrop-blur-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)]">
+              <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white to-white/60 drop-shadow-2xl">70%</p>
+              <p className="mt-2 text-xl font-bold text-white shadow-black drop-shadow-lg">Daily exercise</p>
+              <p className="mt-2 text-sm text-white/80 leading-relaxed font-medium">Only today’s exercise is open, built exclusively from topics the tutor confirmed.</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <p className="text-4xl font-bold">20%</p>
-              <p className="mt-2 text-lg font-semibold">Peer marking</p>
-              <p className="mt-2 text-sm text-slate-300">Students strengthen reasoning by marking a peer’s uploaded work with comments and marks.</p>
+
+            {/* 20% Card */}
+            <div className="animate-float-medium absolute top-[140px] -right-4 lg:-right-8 z-20 w-11/12 rounded-3xl border border-brand-400/40 bg-brand-900/60 p-6 backdrop-blur-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)]">
+              <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-100 drop-shadow-xl">20%</p>
+              <p className="mt-2 text-lg font-bold text-white drop-shadow-md">Peer marking</p>
+              <p className="mt-2 text-sm text-brand-100/90 leading-relaxed">Strengthen reasoning by marking a peer’s uploaded work with absolute focus.</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <p className="text-4xl font-bold">10%</p>
-              <p className="mt-2 text-lg font-semibold">Tutor guidance</p>
-              <p className="mt-2 text-sm text-slate-300">Tutors track coverage, leave notes, and steer AI recommendations with trusted learning context.</p>
+
+            {/* 10% Card */}
+            <div className="animate-float-slow absolute top-[280px] -left-2 lg:-left-6 z-10 w-10/12 rounded-3xl border border-slate-700/50 bg-slate-950/70 p-6 backdrop-blur-md shadow-[0_20px_40px_-10px_rgba(0,0,0,0.6)]">
+              <p className="text-4xl font-extrabold text-slate-300 drop-shadow-lg">10%</p>
+              <p className="mt-2 text-lg font-bold text-white drop-shadow-md">Tutor guidance</p>
+              <p className="mt-2 text-sm text-slate-400 leading-relaxed">Tutors track coverage, leave notes, and naturally steer AI recommendations.</p>
             </div>
           </div>
         </div>
@@ -85,7 +103,7 @@ export const LandingPage = () => (
     <LandingSection eyebrow="Platform" title="Built for the real Examify workflow" description="The first version goes beyond static screens by wiring the core app flows, backend function structure, and data boundaries needed for production deployment.">
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         {features.map(({ title, description, icon: Icon }) => (
-          <div key={title} className="panel p-6">
+          <div key={title} className="panel p-6 transition-all duration-300 hover:-translate-y-2 hover:-translate-x-1 hover:shadow-[10px_10px_0px_rgba(37,99,235,0.15)] bg-gradient-to-br hover:from-white hover:to-slate-50">
             <div className="inline-flex rounded-2xl bg-brand-50 p-3 text-brand-700">
               <Icon className="h-6 w-6" />
             </div>
@@ -104,8 +122,8 @@ export const LandingPage = () => (
             <p className="font-semibold">Session pricing</p>
           </div>
           <ul className="mt-5 space-y-4 text-sm text-slate-600">
-            <li className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span>Online session</span><strong>${SESSION_PRICING.online.toFixed(2)}</strong></li>
-            <li className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span>In-person session</span><strong>${SESSION_PRICING.inPerson.toFixed(2)}</strong></li>
+            <li className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span>Online session</span><strong>R{SESSION_PRICING.online.toFixed(2)}</strong></li>
+            <li className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3"><span>In-person session</span><strong>R{SESSION_PRICING.inPerson.toFixed(2)}</strong></li>
           </ul>
         </div>
         <div className="panel p-6">
@@ -118,5 +136,6 @@ export const LandingPage = () => (
         </div>
       </div>
     </LandingSection>
-  </>
-);
+    </>
+  );
+};

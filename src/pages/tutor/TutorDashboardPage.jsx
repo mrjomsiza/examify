@@ -11,11 +11,15 @@ import {
   getTutorReports,
   saveCompletedLesson,
   saveTutorReport,
+  subscribeToAssignedStudentsForTutor,
+  subscribeToUnassignedStudents,
 } from '../../services/firestoreService';
 
 export const TutorDashboardPage = () => {
   const { profile, logout } = useAuth();
   const [dashboard, setDashboard] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [unassignedStudents, setUnassignedStudents] = useState([]);
   const [status, setStatus] = useState('');
   const [reportForm, setReportForm] = useState({ studentId: '', reportId: '', note: '' });
   const [lessonForm, setLessonForm] = useState({ studentId: '', topic: '', topicReport: '', understandingLevel: 5 });
@@ -24,21 +28,27 @@ export const TutorDashboardPage = () => {
     console.log('[Examify][TutorDashboard] load:start', { tutorId: profile?.uid });
     const data = await getRoleDashboardData('tutor', { tutorId: profile?.uid });
     setDashboard(data);
-    if (data.students?.[0] && !reportForm.studentId) {
-      setReportForm((current) => ({ ...current, studentId: data.students[0].id }));
-      setLessonForm((current) => ({ ...current, studentId: data.students[0].id }));
-    }
   };
 
   useEffect(() => {
     loadDashboard();
-  }, []);
+    
+    if (profile?.uid) {
+      const unsub1 = subscribeToAssignedStudentsForTutor(profile.uid, (data) => {
+        setStudents(data);
+        if (data[0]) {
+          setReportForm((current) => current.studentId ? current : { ...current, studentId: data[0].uid || data[0].id });
+          setLessonForm((current) => current.studentId ? current : { ...current, studentId: data[0].uid || data[0].id });
+        }
+      });
+      const unsub2 = subscribeToUnassignedStudents(setUnassignedStudents);
+      return () => { unsub1(); unsub2(); };
+    }
+  }, [profile?.uid]);
 
   if (!dashboard) return null;
 
-  const students = dashboard.students ?? [];
-  const unassignedStudents = dashboard.unassignedStudents ?? [];
-  const selectedStudent = students.find((student) => student.id === reportForm.studentId) ?? students[0] ?? null;
+  const selectedStudent = students.find((student) => (student.uid || student.id) === reportForm.studentId) ?? students[0] ?? null;
 
   const handleAssignStudent = async (studentId) => {
     console.log('[Examify][TutorDashboard] assignStudent:start', { studentId, tutorId: profile?.uid });
@@ -123,11 +133,11 @@ export const TutorDashboardPage = () => {
           <SectionHeader eyebrow="Students" title="Assigned learners" description="Tutors must add students manually from the unassigned pool before reports and lessons can be managed." />
           <div className="space-y-4">
             {students.length ? students.map((student) => (
-              <div key={student.id} className="panel p-5">
+              <div key={student.uid || student.id} className="panel p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-lg font-semibold text-slate-950">{student.name}</p>
-                    <p className="mt-1 text-sm text-slate-500">{student.grade} • {student.province}</p>
+                    <p className="text-lg font-semibold text-slate-950">{student.displayName || student.name || 'Student'}</p>
+                    <p className="mt-1 text-sm text-slate-500">{student.grade || '?'} • {student.province || '?'}</p>
                   </div>
                   <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] ${student.paymentCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
                     {student.paymentCompleted ? 'paid' : 'unpaid'}
@@ -142,12 +152,12 @@ export const TutorDashboardPage = () => {
           <SectionHeader eyebrow="Add student" title="Unassigned students" description="Only students without a Maths tutor appear here." />
           <div className="space-y-4">
             {unassignedStudents.length ? unassignedStudents.map((student) => (
-              <div key={student.id} className="panel flex items-center justify-between gap-3 p-5">
+              <div key={student.uid || student.id} className="panel flex items-center justify-between gap-3 p-5">
                 <div>
-                  <p className="font-semibold text-slate-950">{student.name}</p>
-                  <p className="mt-1 text-sm text-slate-500">{student.grade} • {student.province}</p>
+                  <p className="font-semibold text-slate-950">{student.displayName || student.name || 'Student'}</p>
+                  <p className="mt-1 text-sm text-slate-500">{student.grade || '?'} • {student.province || '?'}</p>
                 </div>
-                <button type="button" className="btn-primary" onClick={() => handleAssignStudent(student.id)}>Add student</button>
+                <button type="button" className="btn-primary" onClick={() => handleAssignStudent(student.uid || student.id)}>Add student</button>
               </div>
             )) : <div className="panel p-5 text-sm text-slate-500">There are no unassigned students right now.</div>}
           </div>
@@ -162,7 +172,7 @@ export const TutorDashboardPage = () => {
             setLessonForm((current) => ({ ...current, studentId: event.target.value }));
           }}>
             <option value="">Select assigned student</option>
-            {students.map((student) => <option key={student.id} value={student.id}>{student.name}</option>)}
+            {students.map((student) => <option key={student.uid || student.id} value={student.uid || student.id}>{student.displayName || student.name || 'Student'}</option>)}
           </select>
           <textarea className="input min-h-40" value={reportForm.note} onChange={(event) => setReportForm((current) => ({ ...current, note: event.target.value }))} placeholder="Explain the student's capabilities, weaknesses, and readiness." />
           <button type="button" className="btn-primary" onClick={handleSaveReport} disabled={!selectedStudent}>Save latest report</button>

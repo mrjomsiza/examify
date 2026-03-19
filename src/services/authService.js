@@ -4,7 +4,9 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  signOut,
   updateProfile,
+  updatePassword,
 } from 'firebase/auth';
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../firebase/config';
@@ -129,4 +131,29 @@ export const logout = async () => {
   if (!isFirebaseConfigured) return true;
   await signOut(auth);
   return true;
+};
+
+export const updateUserProfileDetails = async ({ uid, displayName, previousYearMark, newPassword }) => {
+  logStage('updateUserProfileDetails:start', { uid });
+
+  if (isFirebaseConfigured && auth?.currentUser) {
+    if (displayName) {
+      await updateProfile(auth.currentUser, { displayName });
+    }
+    if (newPassword) {
+      await updatePassword(auth.currentUser, newPassword);
+    }
+    
+    const payload = { updatedAt: serverTimestamp() };
+    if (displayName) payload.displayName = displayName;
+    if (previousYearMark !== undefined && previousYearMark !== null) {
+      payload.previousYearMark = Number(previousYearMark);
+    }
+    
+    await updateDoc(doc(db, collections.users, uid), payload);
+    return { uid, ...payload };
+  } else {
+    // Demo mode bypass
+    return { uid, displayName, previousYearMark };
+  }
 };

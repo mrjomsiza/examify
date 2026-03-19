@@ -13,6 +13,7 @@ import {
   getRoleDashboardData,
   getStudentAccessState,
   getTodayExercise,
+  subscribeToUserProfile,
 } from '../../services/firestoreService';
 import { uploadSubmissionImage } from '../../services/storageService';
 import { getSubscriptionQuote } from '../../services/paymentsService';
@@ -25,6 +26,16 @@ export const StudentDashboardPage = () => {
   const [aiRecommendations, setAiRecommendations] = useState([]);
   const [loadError, setLoadError] = useState('');
   const [accessState, setAccessState] = useState(null);
+  const [tutorProfile, setTutorProfile] = useState(null);
+
+  useEffect(() => {
+    if (profile?.tutorId) {
+      const unsubscribe = subscribeToUserProfile(profile.tutorId, setTutorProfile);
+      return () => unsubscribe();
+    } else {
+      setTutorProfile(null);
+    }
+  }, [profile?.tutorId]);
 
   useEffect(() => {
     const load = async () => {
@@ -173,6 +184,18 @@ export const StudentDashboardPage = () => {
         </div>
 
         <div className="space-y-6">
+          <div className="space-y-6">
+            <SectionHeader eyebrow="Support" title="Assigned Tutor" description="Your assigned mathematics tutor who reviews your work and approves AI generation." />
+            <div className="panel p-6 flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-xl font-bold text-brand-700">
+                {tutorProfile?.displayName?.[0] ?? 'T'}
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-slate-950">{tutorProfile ? tutorProfile.displayName : 'Awaiting assignment'}</p>
+                <p className="text-sm text-slate-500">{tutorProfile ? 'Active Tutor' : 'No tutor assigned yet'}</p>
+              </div>
+            </div>
+          </div>
           <SectionHeader eyebrow="Billing" title="Subscription guidance" description="Plan pricing is derived from the student-entered previous year mark or the latest mark once results exist." />
           <div className="panel space-y-4 p-6">
             <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 text-sm">
@@ -185,7 +208,7 @@ export const StudentDashboardPage = () => {
             </div>
             <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 text-sm">
               <span>Estimated amount</span>
-              <strong>${quote.amount.toFixed(2)}</strong>
+              <strong>R{quote.amount.toFixed(2)}</strong>
             </div>
           </div>
         </div>

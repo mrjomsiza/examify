@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   limit,
+  onSnapshot,
   orderBy,
   query,
   serverTimestamp,
@@ -576,4 +577,39 @@ export const generateExercisePlanIfEligible = async ({ student, mode, latestTuto
   }
 
   return { generated: createdAssignments.length > 0, reason: `${mode} generation complete`, assignments: createdAssignments, criteria: studentState.generationStatus };
+};
+
+export const subscribeToAssignedStudentsForTutor = (tutorId, callback) => {
+  if (!isFirebaseConfigured) {
+    const demoStudents = demoUsers.filter((user) => user.role === 'student' && user.tutorId === tutorId);
+    callback(demoStudents);
+    return () => {};
+  }
+  const q = query(collection(db, collections.users), where('tutorId', '==', tutorId));
+  return onSnapshot(q, (snapshot) => {
+    callback(snapshot.docs.map(item => item.data()));
+  }, (error) => console.error('[Examify][Firestore] subscribeToAssignedStudents error', error));
+};
+
+export const subscribeToUnassignedStudents = (callback) => {
+  if (!isFirebaseConfigured) {
+    const demoStudents = demoUsers.filter((user) => user.role === 'student' && !user.tutorId);
+    callback(demoStudents);
+    return () => {};
+  }
+  const q = query(collection(db, collections.users), where('role', '==', 'student'));
+  return onSnapshot(q, (snapshot) => {
+    callback(snapshot.docs.map(item => item.data()).filter(student => !student.tutorId));
+  }, (error) => console.error('[Examify][Firestore] subscribeToUnassignedStudents error', error));
+};
+
+export const subscribeToUserProfile = (uid, callback) => {
+  if (!isFirebaseConfigured) {
+    const mockUser = Object.values(mockUsers).find((u) => u.uid === uid);
+    callback(mockUser || null);
+    return () => {};
+  }
+  return onSnapshot(doc(db, collections.users, uid), (snapshot) => {
+    callback(snapshot.exists() ? snapshot.data() : null);
+  }, (error) => console.error('[Examify][Firestore] subscribeToUserProfile error', error));
 };

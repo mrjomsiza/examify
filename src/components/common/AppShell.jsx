@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, ClipboardCheck, CreditCard, FileText, LogOut, Users, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, BookOpen, ClipboardCheck, CreditCard, FileText, LogOut, Users, ShieldCheck, Menu, X } from 'lucide-react';
 import { Logo } from './Logo';
 import { ROLES } from '../../lib/constants';
 
@@ -28,21 +29,58 @@ const navigationByRole = {
 };
 
 export const AppShell = ({ title, subtitle, role, user, onLogout, children }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigation = navigationByRole[role] ?? [];
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
-      <div className="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-4 lg:grid-cols-[260px_1fr] lg:px-6">
-        <aside className="panel sticky top-4 h-fit p-5">
-          <Link to="/" className="mb-8 block">
+      <div className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-4 lg:grid lg:grid-cols-[260px_1fr] lg:px-6">
+        
+        {/* Mobile Header */}
+        <div className="panel flex flex-none items-center justify-between p-4 lg:hidden">
+          <Link to={`/${role}`}>
             <Logo />
           </Link>
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="rounded-lg p-2 text-slate-600 hover:bg-slate-50 transition"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+        </div>
+
+        {/* Mobile Drawer Backdrop */}
+        {isMobileMenuOpen && (
+          <div 
+            className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-sm lg:hidden transition-opacity"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
+        <aside 
+          className={`panel z-50 flex flex-col p-5 transition-transform duration-300 ease-in-out
+            fixed inset-y-4 left-4 max-w-[300px] w-[90vw] overflow-y-auto
+            ${isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
+            lg:sticky lg:top-4 lg:w-auto lg:max-w-none lg:translate-x-0 lg:h-fit lg:shadow-sm`}
+        >
+          <div className="mb-8 flex items-center justify-between">
+            <Link to={`/${role}`} className="block" onClick={() => setIsMobileMenuOpen(false)}>
+              <Logo />
+            </Link>
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden transition"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
           <nav className="space-y-2">
             {navigation.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={to === `/${role}`}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition ${
                     isActive ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -58,7 +96,7 @@ export const AppShell = ({ title, subtitle, role, user, onLogout, children }) =>
             <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Signed in</p>
             <p className="mt-2 font-semibold text-slate-900">{user?.displayName}</p>
             <p className="text-sm text-slate-500">{user?.email}</p>
-            <button type="button" onClick={onLogout} className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-rose-600">
+            <button type="button" onClick={() => { setIsMobileMenuOpen(false); onLogout(); }} className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-rose-600">
               <LogOut className="h-4 w-4" />
               Log out
             </button>

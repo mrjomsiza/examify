@@ -1,18 +1,73 @@
+import { useState } from 'react';
 import { AppShell } from '../../components/common/AppShell';
 import { useAuth } from '../../hooks/useAuth';
+import { updateUserProfileDetails } from '../../services/authService';
 
 export const StudentProfilePage = () => {
   const { profile, logout, isDemoMode } = useAuth();
+  
+  const [displayName, setDisplayName] = useState(profile?.displayName || '');
+  const [previousYearMark, setPreviousYearMark] = useState(profile?.previousYearMark ?? 0);
+  const [password, setPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setMessage('');
+    try {
+      await updateUserProfileDetails({
+        uid: profile?.uid,
+        displayName,
+        previousYearMark,
+        newPassword: password || undefined,
+      });
+      setMessage('Profile updated successfully!');
+      setPassword('');
+      if (isDemoMode) {
+        alert('Profile saved (Demo mode)');
+      }
+    } catch (err) {
+      setMessage(err.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <AppShell title="Profile" subtitle="Review your learner profile, tutor assignment context, onboarding mark, and payment state." role="student" user={profile} onLogout={logout}>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <div className="panel p-5"><p className="text-sm text-slate-500">Name</p><p className="mt-2 text-xl font-semibold text-slate-950">{profile?.displayName}</p></div>
-        <div className="panel p-5"><p className="text-sm text-slate-500">Grade</p><p className="mt-2 text-xl font-semibold text-slate-950">{profile?.grade}</p></div>
-        <div className="panel p-5"><p className="text-sm text-slate-500">Province</p><p className="mt-2 text-xl font-semibold text-slate-950">{profile?.province}</p></div>
-        <div className="panel p-5"><p className="text-sm text-slate-500">Previous year mark</p><p className="mt-2 text-xl font-semibold text-slate-950">{profile?.previousYearMark ?? 0}%</p></div>
+    <AppShell title="Profile" subtitle="Review and update your learner profile, onboarding mark, and security settings." role="student" user={profile} onLogout={logout}>
+      <form onSubmit={handleSave} className="panel p-6 max-w-2xl grid gap-6">
+        {message && <div className="rounded-xl bg-brand-50 p-4 text-sm font-medium text-brand-700">{message}</div>}
+        
+        <div>
+          <label className="label">Full Name</label>
+          <input type="text" className="input" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required />
+        </div>
+
+        <div>
+          <label className="label">Previous year mark (%)</label>
+          <input type="number" min="0" max="100" className="input" value={previousYearMark} onChange={(e) => setPreviousYearMark(e.target.value)} required />
+        </div>
+
+        <div>
+          <label className="label">New Password (leave blank to keep current)</label>
+          <input type="password" minLength="6" className="input" value={password} onChange={(e) => setPassword(e.target.value)} />
+        </div>
+
+        <div>
+          <button type="submit" disabled={saving} className="btn-primary w-full md:w-auto">
+            {saving ? 'Saving...' : 'Update Profile'}
+          </button>
+        </div>
+      </form>
+
+      <div className="grid gap-4 md:grid-cols-3 mt-6">
+        <div className="panel p-5"><p className="text-sm text-slate-500">Grade</p><p className="mt-2 text-xl font-semibold text-slate-950">{profile?.grade || 'Not set'}</p></div>
+        <div className="panel p-5"><p className="text-sm text-slate-500">Province</p><p className="mt-2 text-xl font-semibold text-slate-950">{profile?.province || 'Not set'}</p></div>
         <div className="panel p-5"><p className="text-sm text-slate-500">Payment state</p><p className="mt-2 text-xl font-semibold text-slate-950">{profile?.paymentCompleted ? 'Paid' : 'Pending'}</p></div>
       </div>
+
       <div className="panel mt-6 p-5 text-sm text-slate-600">Environment mode: {isDemoMode ? 'Demo' : 'Live Firebase'}.</div>
     </AppShell>
   );

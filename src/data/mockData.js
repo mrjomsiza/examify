@@ -175,11 +175,11 @@ export const mockDashboardData = {
     stats: [
       { label: 'Active students', value: '2', detail: '1 has paid' },
       { label: 'Active tutors', value: '1', detail: 'Maths tutors' },
-      { label: 'Monthly revenue', value: '$4.40', detail: 'Projected' },
+      { label: 'Monthly revenue', value: 'R440.00', detail: 'Projected' },
       { label: 'Platform alerts', value: '0', detail: 'All clear' },
     ],
     payments: [
-      { id: 'pay-1', studentName: 'Naledi Khumalo', amount: '$4.40', status: 'Paid', month: `${PAPER_MONTHS[0]} 2026` },
+      { id: 'pay-1', studentName: 'Naledi Khumalo', amount: 'R440.00', status: 'Paid', month: `${PAPER_MONTHS[0]} 2026` },
     ],
     tutors: [
       { id: 'mock-tutor-1', name: 'Mr. Dlamini', students: 1, province: 'Gauteng' },
