@@ -3,8 +3,8 @@ Before working in Firebase Studio
 git status
 git pull --rebase origin main
 
-After editing in Firebase Studio and Before asking Codex
+After editing in Codespaces and Before asking Codex
 
 git add .
-git commit -m "Functions deployed at this stage."
+git commit -m "Working from Codespaces."
 git push origin main

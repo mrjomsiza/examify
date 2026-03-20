@@ -4,7 +4,6 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
-  signOut,
   updateProfile,
   updatePassword,
 } from 'firebase/auth';
