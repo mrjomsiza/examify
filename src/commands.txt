@@ -8,3 +8,16 @@ After editing in Codespaces and Before asking Codex
 git add .
 git commit -m "Fixed the visible drawer on mobile. Working from Codespaces. 20-03-2026."
 git push origin main
+
+
+These are for injecting keys to Firebase:
+
+firebase functions:secrets:set PAYSTACK_CONFIG
+firebase functions:secrets:set APP_CONFIG
+firebase functions:secrets:set GEMINI_CONFIG
+
+Deploying to Hosting:
+
+npm run build
+firebase deploy --only hosting:examify
+firebase deploy --only functions

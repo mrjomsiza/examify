@@ -14,7 +14,7 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-export const firestoreDatabaseId = import.meta.env.VITE_FIRESTORE_DATABASE_ID?.trim() || '(default)';
+export const firestoreDatabaseId = 'tutoring';
 export const firebaseAiModel = import.meta.env.VITE_FIREBASE_AI_MODEL?.trim() || 'gemini-2.5-flash';
 
 export const isFirebaseConfigured = Boolean(

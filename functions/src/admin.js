@@ -1,12 +1,28 @@
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAppConfig } from './config.js';
 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-const firestoreDatabaseId = process.env.FIRESTORE_DATABASE_ID?.trim() || '(default)';
+let dbInstance = null;
+let firestoreDatabaseId = '(default)';
 
-export const db = firestoreDatabaseId === '(default)' ? getFirestore() : getFirestore(firestoreDatabaseId);
+export const getDb = () => {
+  if (dbInstance) return dbInstance;
+
+  const appConfig = getAppConfig();
+  firestoreDatabaseId = appConfig.firestoreDatabaseId;
+
+  dbInstance =
+    firestoreDatabaseId === '(default)'
+      ? getFirestore()
+      : getFirestore(firestoreDatabaseId);
+
+  return dbInstance;
+};
+
 export const storage = admin.storage();
-export { admin, firestoreDatabaseId };
+export const getFirestoreDatabaseId = () => firestoreDatabaseId;
+export { admin };

@@ -14,6 +14,7 @@ import {
   subscribeToAssignedStudentsForTutor,
   subscribeToUnassignedStudents,
 } from '../../services/firestoreService';
+import { updateDoc } from 'firebase/firestore';
 
 export const TutorDashboardPage = () => {
   const { profile, logout } = useAuth();
@@ -23,6 +24,7 @@ export const TutorDashboardPage = () => {
   const [status, setStatus] = useState('');
   const [reportForm, setReportForm] = useState({ studentId: '', reportId: '', note: '' });
   const [lessonForm, setLessonForm] = useState({ studentId: '', topic: '', topicReport: '', understandingLevel: 5 });
+  const [latestReport, setLatestReport] = useState('');
 
   const loadDashboard = async () => {
     console.log('[Examify][TutorDashboard] load:start', { tutorId: profile?.uid });
@@ -49,6 +51,7 @@ export const TutorDashboardPage = () => {
   if (!dashboard) return null;
 
   const selectedStudent = students.find((student) => (student.uid || student.id) === reportForm.studentId) ?? students[0] ?? null;
+  const lessonSelectedStudent = students.find((lessonStudent) => (lessonStudent.uid || lessonStudent.id) === lessonForm.studentId) ?? students[0] ?? null;
 
   const handleAssignStudent = async (studentId) => {
     console.log('[Examify][TutorDashboard] assignStudent:start', { studentId, tutorId: profile?.uid });
@@ -69,35 +72,85 @@ export const TutorDashboardPage = () => {
       return;
     }
 
+    if (!selectedStudent?.latestReport) {
+      await setDoc(
+        doc(db, 'users', reportForm.studentId),
+        {
+          latestReport: "",
+        },
+        { merge: true }
+      );
+    } else {
+      setLatestReport(selectedStudent?.latestReport);
+    }
+
     console.log('[Examify][TutorDashboard] saveReport:start', reportForm);
-    const existingReports = await getTutorReports(selectedStudent.id);
-    const latestReport = existingReports[0] ?? null;
-    const result = await saveTutorReport({
-      reportId: latestReport?.id ?? reportForm.reportId,
-      studentId: selectedStudent.id,
-      tutorId: profile?.uid,
-      studentName: selectedStudent.name,
-      note: reportForm.note,
-    });
+    const newEntryFormatted = `
+    --- Report for: ${selectedStudent?.displayName} ---
+
+    Report Entry:
+    ${reportForm.note}
+    Date: ${new Date().toLocaleString()}
+    `;
+    const updatedReport = newEntryFormatted;
+    setLatestReport(updatedReport);
+    await setDoc(
+      doc(db, 'users', profile?.uid),
+      {
+        latestReport: latestReport,
+        updatedAt: new Date(),
+      },
+      { merge: true }
+    );
     console.log('[Examify][TutorDashboard] saveReport:success', result);
     setStatus('Tutor report saved. The latest report will be used for AI exercise generation.');
     await loadDashboard();
   };
 
   const handleCompleteLesson = async () => {
-    if (!selectedStudent) {
+    if (!lessonSelectedStudent) {
       setStatus('Assign a student first before marking a lesson complete.');
       return;
     }
+
+    if (!lessonSelectedStudent?.latestReport) {
+      await setDoc(
+        doc(db, 'users', lessonForm.studentId),
+        {
+          latestReport: "",
+        },
+        { merge: true }
+      );
+    } else {
+      setLatestReport(lessonSelectedStudent?.latestReport);
+    }
+
+    const newEntryFormatted = `
+    --- ${lessonForm.topic} ---
+    Topic: Algebra
+    Tutor Topic Report:
+    ${newEntry}
+    Date: ${new Date().toLocaleString()}
+    `;
+    const updatedReport = `${latestReport}${latestReport ? '\n\n' : ''}${newEntryFormatted}`;
+    setLatestReport(updatedReport);
+    await setDoc(
+      doc(db, 'users', lessonSelectedStudent?.studentId),
+      {
+        latestReport: latestReport,
+        updatedAt: new Date(),
+      },
+      { merge: true }
+    );
 
     console.log('[Examify][TutorDashboard] completeLesson:start', lessonForm);
     const lesson = await saveCompletedLesson({
       studentId: selectedStudent.id,
       tutorId: profile?.uid,
-      studentName: selectedStudent.name,
       topic: lessonForm.topic,
       topicReport: lessonForm.topicReport,
       understandingLevel: Number(lessonForm.understandingLevel),
+      studentName: selectedStudent.name,
     });
 
     const availablePapers = await getQuestionPapers({ grade: selectedStudent.grade, region: selectedStudent.province, subject: 'Mathematics' });
@@ -166,10 +219,9 @@ export const TutorDashboardPage = () => {
 
       <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
         <div className="panel space-y-4 p-6">
-          <SectionHeader eyebrow="Latest report" title="Student capability report" description="Reports are editable and the latest report is always what AI uses during generation." />
+          <SectionHeader eyebrow="Initial Report" title="Student Report upon adding." description="This report will be the base report, provide as much details as you can." />
           <select className="input" value={reportForm.studentId} onChange={(event) => {
             setReportForm((current) => ({ ...current, studentId: event.target.value }));
-            setLessonForm((current) => ({ ...current, studentId: event.target.value }));
           }}>
             <option value="">Select assigned student</option>
             {students.map((student) => <option key={student.uid || student.id} value={student.uid || student.id}>{student.displayName || student.name || 'Student'}</option>)}
@@ -180,6 +232,12 @@ export const TutorDashboardPage = () => {
 
         <div className="panel space-y-4 p-6">
           <SectionHeader eyebrow="Lesson complete" title="Complete topic and trigger weekly generation" description="When a lesson is marked complete, provide the topic, the lesson report, and understanding level from 0 to 10." />
+          <select className="input" value={reportForm.studentId} onChange={(event) => {
+            setLessonForm((current) => ({ ...current, studentId: event.target.value }));
+          }}>
+            <option value="">Select assigned student</option>
+            {students.map((lessonStudent) => <option key={lessonStudent.uid || lessonStudent.id} value={lessonStudent.uid || lessonStudent.id}>{lessonStudent.displayName || lessonStudent.name || 'Student'}</option>)}
+          </select>
           <input className="input" value={lessonForm.topic} onChange={(event) => setLessonForm((current) => ({ ...current, topic: event.target.value }))} placeholder="Topic name covered" />
           <textarea className="input min-h-32" value={lessonForm.topicReport} onChange={(event) => setLessonForm((current) => ({ ...current, topicReport: event.target.value }))} placeholder="Topic-specific report for the student" />
           <label>

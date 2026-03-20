@@ -29,6 +29,7 @@ export const SignupPage = () => {
         email: form.email,
         password: form.password,
         role: form.role,
+        latestReport: "",
         extraProfile: {
           grade: form.role === ROLES.STUDENT ? form.grade : null,
           province: form.role === ROLES.STUDENT ? form.province : null,
