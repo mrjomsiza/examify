@@ -60,7 +60,7 @@ export const AppShell = ({ title, subtitle, role, user, onLogout, children }) =>
         <aside 
           className={`panel z-50 flex flex-col p-5 transition-transform duration-300 ease-in-out
             fixed inset-y-4 left-4 max-w-[300px] w-[90vw] overflow-y-auto
-            ${isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
+            ${isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-[calc(100%+1.5rem)]'}
             lg:sticky lg:top-4 lg:w-auto lg:max-w-none lg:translate-x-0 lg:h-fit lg:shadow-sm`}
         >
           <div className="mb-8 flex items-center justify-between">
