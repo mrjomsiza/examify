@@ -6,7 +6,7 @@ git pull --rebase origin main
 After editing in Codespaces and Before asking Codex
 
 git add .
-git commit -m "FSystem works 99%, we just need to make Touch ups and then use the actual payment KEY. Working from Codespaces. 21-03-2026."
+git commit -m "SCommit before Codex, we just need to make Touch ups and then use the actual payment KEY. Working from Codespaces. 21-03-2026."
 git push origin main
 
 

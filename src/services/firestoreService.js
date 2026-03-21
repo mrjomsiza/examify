@@ -218,7 +218,7 @@ export const getExerciseHistory = async (studentId) => {
   const q = query(
     collection(db, collections.dailyExerciseAssignments),
     where('studentId', '==', studentId),
-    orderBy('assignmentDate', 'desc'),
+    orderBy('assignmentDate', 'asc'),
     limit(20),
   );
   const snapshot = await getDocs(q);
