@@ -32,7 +32,7 @@ export const LoginPage = () => {
         <div className="panel-dark p-8 text-white">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200">Access Examify</p>
           <h1 className="mt-4 text-4xl font-bold">Continue learning, teaching, or managing.</h1>
-          <p className="mt-4 text-slate-300">Use Firebase Auth credentials in production, or use the included demo accounts to explore the role-based dashboards immediately.</p>
+          <p className="mt-4 text-slate-300">Sign in to continue learning, teaching, or managing your Examify workspace.</p>
           <div className="mt-8 space-y-3">
             {demoAccounts.map((account) => (
               <button key={account.email} type="button" onClick={() => loginAsDemo(account.email).then((profile) => redirectByRole(profile.role))} className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm hover:border-brand-400/50">
@@ -59,7 +59,7 @@ export const LoginPage = () => {
           <button type="submit" className="btn-primary w-full">Login</button>
           <button type="button" onClick={() => loginWithGoogle().then((result) => redirectByRole(result.profile.role)).catch((error) => setStatus(error.message))} className="btn-secondary w-full">Continue with Google</button>
           {status ? <p className="text-sm text-rose-600">{status}</p> : null}
-          <p className="text-sm text-slate-500">{isDemoMode ? 'Demo mode is active until Firebase variables are configured.' : 'Live Firebase mode is active.'}</p>
+          <p className="text-sm text-slate-500">{isDemoMode ? 'Practice access is currently available.' : 'Your account is ready to continue.'}</p>
           <p className="text-sm text-slate-500">Need an account? <Link to="/signup" className="font-semibold text-brand-700">Create one</Link>.</p>
         </form>
       </div>

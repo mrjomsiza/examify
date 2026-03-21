@@ -9,9 +9,11 @@ import { StudentExercisesPage } from '../pages/student/StudentExercisesPage';
 import { StudentPeerReviewsPage } from '../pages/student/StudentPeerReviewsPage';
 import { StudentBillingPage } from '../pages/student/StudentBillingPage';
 import { StudentProfilePage } from '../pages/student/StudentProfilePage';
+import { StudentGuidePage } from '../pages/student/StudentGuidePage';
 import { TutorDashboardPage } from '../pages/tutor/TutorDashboardPage';
 import { TutorStudentsPage } from '../pages/tutor/TutorStudentsPage';
 import { TutorReportsPage } from '../pages/tutor/TutorReportsPage';
+import { TutorGuidePage } from '../pages/tutor/TutorGuidePage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
 import { AdminPaymentsPage } from '../pages/admin/AdminPaymentsPage';
@@ -33,6 +35,7 @@ export const AppRoutes = () => (
       <Route path="/student/peer-reviews" element={<StudentPeerReviewsPage />} />
       <Route path="/student/billing" element={<StudentBillingPage />} />
       <Route path="/student/profile" element={<StudentProfilePage />} />
+      <Route path="/student/guide" element={<StudentGuidePage />} />
       <Route path="/student/papers" element={<PastExamPapersPage />} />
     </Route>
 
@@ -41,6 +44,7 @@ export const AppRoutes = () => (
       <Route path="/tutor/students" element={<TutorStudentsPage />} />
       <Route path="/tutor/papers" element={<PastExamPapersPage />} />
       <Route path="/tutor/reports" element={<TutorReportsPage />} />
+      <Route path="/tutor/guide" element={<TutorGuidePage />} />
     </Route>
 
     <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]} />}>

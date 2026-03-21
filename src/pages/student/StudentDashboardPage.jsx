@@ -47,7 +47,7 @@ export const StudentDashboardPage = () => {
         if (!studentAccess.paymentCompleted) {
           console.log('[Examify][StudentDashboard] load:paymentRequired');
           setAiRecommendations([]);
-          setLoadError('Complete payment first. Exercises and AI generation remain locked until payment is recorded.');
+          setLoadError('Complete payment first. Exercises will unlock once your payment is recorded.');
           return;
         }
 
@@ -71,14 +71,14 @@ export const StudentDashboardPage = () => {
           setLoadError('');
         } else {
           setAiRecommendations([]);
-          setLoadError('AI is waiting for the required criteria: previous year mark, tutor report, matching past paper, and payment for initial generation.');
+          setLoadError('Your next recommended work will appear once the required learning details and payment status are in place.');
         }
       } catch (error) {
         console.error('[Examify][StudentDashboard] load:error', error);
         setDashboard((current) => current ?? { stats: [], todayExercise: null, feedback: [], peerReviewAssignment: null });
         setHistory([]);
         setAiRecommendations([]);
-        setLoadError('Some student dashboard data could not be loaded yet. Check Firebase setup and seeded records.');
+        setLoadError('Some student dashboard data could not be loaded yet. Please try again shortly.');
       }
     };
 
@@ -99,7 +99,7 @@ export const StudentDashboardPage = () => {
   return (
     <AppShell
       title="Student dashboard"
-      subtitle="Track payment readiness, AI generation criteria, tutor reports, and today’s approved Maths workflow."
+      subtitle="Track your access status, tutor guidance, and today’s approved Maths workflow."
       role="student"
       user={profile}
       onLogout={logout}
@@ -130,7 +130,7 @@ export const StudentDashboardPage = () => {
             <Sparkles className="h-5 w-5" />
             <h3 className="text-xl font-semibold text-slate-950">AI-backed recommendations</h3>
           </div>
-          <p className="mt-3 text-sm text-slate-500">Firebase AI Logic only runs when the payment and learning-data criteria are satisfied.</p>
+          <p className="mt-3 text-sm text-slate-500">Recommendations appear once the required payment and learning details are in place.</p>
           <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
             <p>Initial generation ready: {String(accessState?.initialGenerationReady)}</p>
             <p>Weekly generation ready: {String(accessState?.weeklyGenerationReady)}</p>

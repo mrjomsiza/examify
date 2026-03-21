@@ -22,7 +22,7 @@ export const AdminDashboardPage = () => {
       </section>
       <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
         <div>
-          <SectionHeader eyebrow="Payments" title="Latest payment activity" description="Payments and subscription records are stored in Firestore after secure Paystack verification." />
+          <SectionHeader eyebrow="Payments" title="Latest payment activity" description="Review recent student payment records and their latest billing status." />
           <div className="mt-4 space-y-4">
             {(dashboard.payments ?? []).map((payment) => (
               <div key={payment.id} className="panel p-5">
@@ -34,7 +34,7 @@ export const AdminDashboardPage = () => {
           </div>
         </div>
         <div>
-          <SectionHeader eyebrow="Tutors" title="Tutor coverage" description="Admins manage tutor supply and can monitor assignment load and province coverage." />
+          <SectionHeader eyebrow="Tutors" title="Tutor coverage" description="Review tutor capacity and location coverage across the platform." />
           <div className="mt-4 space-y-4">
             {(dashboard.tutors ?? []).map((tutor) => (
               <div key={tutor.id} className="panel p-5">

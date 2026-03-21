@@ -18,6 +18,7 @@ export const collections = {
   payments: 'payments',
   notifications: 'notifications',
   settings: 'settings',
+  guideAssessments: 'guideAssessments',
 };
 
 export const firestoreIndexes = {

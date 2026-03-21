@@ -13,8 +13,8 @@ export const TutorReportsPage = () => {
   }, []);
 
   return (
-    <AppShell title="Reports" subtitle="Tutor reports stay as free-text notes to preserve flexibility and manual editing." role="tutor" user={profile} onLogout={logout}>
-      <SectionHeader eyebrow="Guidance" title="Recent tutor notes" description="Reports become part of the future AI planning context while remaining editable by human tutors." />
+    <AppShell title="Reports" subtitle="Review the latest learner notes and keep tutor guidance easy to update." role="tutor" user={profile} onLogout={logout}>
+      <SectionHeader eyebrow="Guidance" title="Recent tutor notes" description="Use recent notes to stay aligned on learner progress and next steps." />
       <div className="grid gap-4">
         {(dashboard?.reports ?? []).map((report) => (
           <div key={report.id} className="panel p-5">

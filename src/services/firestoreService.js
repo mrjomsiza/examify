@@ -47,6 +47,10 @@ const emptyDashboardData = {
     stats: [],
     payments: [],
     tutors: [],
+    users: {
+      students: [],
+      tutors: [],
+    },
   },
 };
 
@@ -190,6 +194,25 @@ export const getRoleDashboardData = async (role, options = {}) => {
   if (!isFirebaseConfigured) {
     if (role === 'student') return buildStudentDashboard(options.studentId ?? 'mock-student-1');
     if (role === 'tutor') return buildTutorDashboard();
+    if (role === 'admin') {
+      return {
+        ...mockDashboardData.admin,
+        users: {
+          students: demoUsers.filter((user) => user.role === 'student').map((user) => ({
+            id: user.uid,
+            name: user.displayName,
+            latestMark: user.latestMark ?? user.previousYearMark ?? 0,
+            role: user.role,
+          })),
+          tutors: demoUsers.filter((user) => user.role === 'tutor').map((user) => ({
+            id: user.uid,
+            name: user.displayName,
+            latestMark: user.latestMark ?? 0,
+            role: user.role,
+          })),
+        },
+      };
+    }
     return mockDashboardData[role];
   }
   return emptyDashboardData[role] ?? { stats: [] };
@@ -576,4 +599,72 @@ export const generateExercisePlanIfEligible = async ({ student, mode, latestTuto
   }
 
   return { generated: createdAssignments.length > 0, reason: `${mode} generation complete`, assignments: createdAssignments, criteria: studentState.generationStatus };
+};
+
+export const getUsersForAdmin = async () => {
+  logStage('getUsersForAdmin:start');
+  if (!isFirebaseConfigured) {
+    return {
+      students: demoUsers.filter((user) => user.role === 'student').map((user) => ({
+        id: user.uid,
+        name: user.displayName,
+        latestMark: user.latestMark ?? user.previousYearMark ?? 0,
+        role: user.role,
+      })),
+      tutors: demoUsers.filter((user) => user.role === 'tutor').map((user) => ({
+        id: user.uid,
+        name: user.displayName,
+        latestMark: user.latestMark ?? 0,
+        role: user.role,
+      })),
+    };
+  }
+
+  ensureDb();
+  const snapshot = await getDocs(query(collection(db, collections.users), orderBy('displayName', 'asc')));
+  const users = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+
+  return {
+    students: users.filter((user) => user.role === 'student').map((user) => ({
+      id: user.id,
+      name: user.displayName,
+      latestMark: user.latestMark ?? user.previousYearMark ?? 0,
+      role: user.role,
+    })),
+    tutors: users.filter((user) => user.role === 'tutor').map((user) => ({
+      id: user.id,
+      name: user.displayName,
+      latestMark: user.latestMark ?? 0,
+      role: user.role,
+    })),
+  };
+};
+
+export const saveGuideAssessmentResult = async ({ userId, userName, role, guideType, answers, score, totalQuestions, percentage }) => {
+  logStage('saveGuideAssessmentResult:start', { userId, role, guideType, score, totalQuestions, percentage });
+  const payload = {
+    userId,
+    userName,
+    role,
+    guideType,
+    answers,
+    score,
+    totalQuestions,
+    percentage,
+  };
+
+  if (!isFirebaseConfigured) {
+    return {
+      id: `mock-guide-${Date.now()}`,
+      ...payload,
+      submittedAt: new Date().toISOString(),
+    };
+  }
+
+  ensureDb();
+  const ref = await addDoc(collection(db, collections.guideAssessments), {
+    ...payload,
+    submittedAt: serverTimestamp(),
+  });
+  return { id: ref.id, ...payload };
 };

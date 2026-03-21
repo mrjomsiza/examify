@@ -25,7 +25,7 @@ export const StudentExercisesPage = () => {
   return (
     <AppShell title="Exercises" subtitle="Review today’s task and browse your Maths assignment timeline." role="student" user={profile} onLogout={logout}>
       {!paymentCompleted ? <div className="panel p-5 text-sm text-amber-700">Payment is required before exercises unlock.</div> : null}
-      <SectionHeader eyebrow="Today" title={todayExercise?.title ?? 'Waiting for today\'s assignment'} description={todayExercise?.instruction ?? 'Once payment and generation criteria are complete, today’s exercise will appear here.'} />
+      <SectionHeader eyebrow="Today" title={todayExercise?.title ?? 'Waiting for today\'s assignment'} description={todayExercise?.instruction ?? 'Once access is active and today’s work is ready, the assignment will appear here.'} />
       <div className="grid gap-4">
         {history.map((exercise) => {
           const availability = getExerciseAvailability(exercise.assignmentDate, exercise.submitted);
