@@ -5,8 +5,9 @@ git pull --rebase origin main
 
 After editing in Codespaces and Before asking Codex
 
+git status
 git add .
-git commit -m "SCommit before Codex, we just need to make Touch ups and then use the actual payment KEY. Working from Codespaces. 21-03-2026."
+git commit -m "Latest Application 90%. Working from Codespaces. 22-03-2026."
 git push origin main
 
 
