@@ -82,14 +82,14 @@ export const StudentDashboardPage = () => {
           setLoadError('');
         } else {
           setAiRecommendations([]);
-          setLoadError('AI is waiting for the required criteria: previous year mark, tutor report, matching past paper, and payment for initial generation.');
+          setLoadError('Exercise planning is waiting for the required criteria: previous year mark, tutor report, matching past paper, and payment for initial generation.');
         }
       } catch (error) {
         console.error('[Examify][StudentDashboard] load:error', error);
         setDashboard((current) => current ?? { stats: [], todayExercise: null, feedback: [], peerReviewAssignment: null });
         setHistory([]);
         setAiRecommendations([]);
-        setLoadError('Some student dashboard data could not be loaded yet. Check Firebase setup and seeded records.');
+        setLoadError('Some student dashboard data could not be loaded yet. Please try again after confirming the required student records are available.');
       }
     };
 
@@ -141,7 +141,7 @@ export const StudentDashboardPage = () => {
             <Sparkles className="h-5 w-5" />
             <h3 className="text-xl font-semibold text-slate-950">AI-backed recommendations</h3>
           </div>
-          <p className="mt-3 text-sm text-slate-500">Firebase AI Logic only runs when the payment and learning-data criteria are satisfied.</p>
+          <p className="mt-3 text-sm text-slate-500">Exercise recommendations only run when the payment and learning-data criteria are satisfied.</p>
           <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
             <p>Initial generation ready: {String(accessState?.initialGenerationReady)}</p>
             <p>Weekly generation ready: {String(accessState?.weeklyGenerationReady)}</p>

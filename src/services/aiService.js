@@ -7,8 +7,8 @@ const fallbackRecommendations = {
     {
       title: 'Awaiting AI recommendation',
       topic: 'Tutor-completed Mathematics topic',
-      reason: 'Firebase AI Logic is temporarily unavailable, so Examify is showing a safe fallback recommendation state.',
-      sourceLabel: 'Retry after confirming Firebase AI Logic is enabled for this project.',
+      reason: 'AI recommendations are temporarily unavailable, so Examify is showing a safe fallback recommendation state.',
+      sourceLabel: 'Retry after confirming AI recommendations are enabled for this project.',
     },
   ],
   source: 'fallback',

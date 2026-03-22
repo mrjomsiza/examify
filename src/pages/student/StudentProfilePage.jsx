@@ -68,7 +68,7 @@ export const StudentProfilePage = () => {
         <div className="panel p-5"><p className="text-sm text-slate-500">Payment state</p><p className="mt-2 text-xl font-semibold text-slate-950">{profile?.paymentCompleted ? 'Paid' : 'Pending'}</p></div>
       </div>
 
-      <div className="panel mt-6 p-5 text-sm text-slate-600">Environment mode: {isDemoMode ? 'Demo' : 'Live Firebase'}.</div>
+      <div className="panel mt-6 p-5 text-sm text-slate-600">Environment mode: {isDemoMode ? 'Demo' : 'Live'}.</div>
     </AppShell>
   );
 };

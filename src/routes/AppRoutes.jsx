@@ -17,6 +17,7 @@ import { AdminUsersPage } from '../pages/admin/AdminUsersPage';
 import { AdminPaymentsPage } from '../pages/admin/AdminPaymentsPage';
 import { AdminSettingsPage } from '../pages/admin/AdminSettingsPage';
 import { PastExamPapersPage } from '../pages/PastExamPapersPage';
+import { GuidePage } from '../pages/GuidePage';
 import { ROLES } from '../lib/constants';
 
 export const AppRoutes = () => (
@@ -34,6 +35,7 @@ export const AppRoutes = () => (
       <Route path="/student/billing" element={<StudentBillingPage />} />
       <Route path="/student/profile" element={<StudentProfilePage />} />
       <Route path="/student/papers" element={<PastExamPapersPage />} />
+      <Route path="/student/guide" element={<GuidePage role="student" />} />
     </Route>
 
     <Route element={<ProtectedRoute allowedRoles={[ROLES.TUTOR]} />}>
@@ -41,6 +43,7 @@ export const AppRoutes = () => (
       <Route path="/tutor/students" element={<TutorStudentsPage />} />
       <Route path="/tutor/papers" element={<PastExamPapersPage />} />
       <Route path="/tutor/reports" element={<TutorReportsPage />} />
+      <Route path="/tutor/guide" element={<GuidePage role="tutor" />} />
     </Route>
 
     <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]} />}>

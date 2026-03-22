@@ -192,7 +192,7 @@ export const StudentBillingPage = () => {
       </div>
 
       <div className="panel mt-6 space-y-4 p-5 text-sm leading-7 text-slate-600">
-        <p>Billing Section.</p>
+        <p>Complete payment here to unlock the student learning flow and keep your subscription active.</p>
 
         <div className="flex flex-wrap gap-3">
           <button
