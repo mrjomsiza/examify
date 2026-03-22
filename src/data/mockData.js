@@ -98,6 +98,42 @@ export const mockStudentAssignments = [
   { studentId: 'mock-student-1', tutorId: 'mock-tutor-1', active: true },
 ];
 
+
+export const mockGuideQuizResults = [
+  {
+    id: 'guide-result-student-1',
+    userId: 'mock-student-1',
+    role: ROLES.STUDENT,
+    userName: 'Naledi Khumalo',
+    percentage: 100,
+    score: 4,
+    totalQuestions: 4,
+    answers: {
+      'student-q1': 'a',
+      'student-q2': 'a',
+      'student-q3': 'a',
+      'student-q4': 'a',
+    },
+    submittedAt: '2026-03-20T10:00:00.000Z',
+  },
+  {
+    id: 'guide-result-tutor-1',
+    userId: 'mock-tutor-1',
+    role: ROLES.TUTOR,
+    userName: 'Mr. Dlamini',
+    percentage: 75,
+    score: 3,
+    totalQuestions: 4,
+    answers: {
+      'tutor-q1': 'a',
+      'tutor-q2': 'a',
+      'tutor-q3': 'a',
+      'tutor-q4': 'b',
+    },
+    submittedAt: '2026-03-21T11:30:00.000Z',
+  },
+];
+
 export const mockDashboardData = {
   student: {
     stats: [

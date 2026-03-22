@@ -22,6 +22,7 @@ import {
   mockQuestionPapers,
   mockTutorReports,
   mockUsers,
+  mockGuideQuizResults,
 } from '../data/mockData';
 import { MAX_AI_SOURCE_PAPERS, MAX_DAILY_EXERCISES, SUBJECT, WEEKLY_EXERCISE_DAYS } from '../lib/constants';
 
@@ -56,6 +57,7 @@ const ensureDb = () => {
 };
 
 const demoUsers = Object.values(mockUsers);
+const demoGuideQuizResults = [...mockGuideQuizResults];
 
 const logStage = (stage, payload = {}) => {
   console.log(`[Examify][Firestore] ${stage}`, payload);
@@ -612,4 +614,113 @@ export const subscribeToUserProfile = (uid, callback) => {
   return onSnapshot(doc(db, collections.users, uid), (snapshot) => {
     callback(snapshot.exists() ? snapshot.data() : null);
   }, (error) => console.error('[Examify][Firestore] subscribeToUserProfile error', error));
+};
+
+
+export const saveGuideQuizResult = async ({ userId, role, userName, answers, score, totalQuestions, percentage }) => {
+  logStage('saveGuideQuizResult:start', { userId, role, percentage });
+  const payload = {
+    userId,
+    role,
+    userName,
+    answers,
+    score,
+    totalQuestions,
+    percentage,
+    submittedAt: new Date().toISOString(),
+  };
+
+  if (!isFirebaseConfigured) {
+    const result = { id: `mock-guide-result-${Date.now()}`, ...payload };
+    demoGuideQuizResults.push(result);
+    return result;
+  }
+
+  ensureDb();
+  const ref = await addDoc(collection(db, collections.guideQuizResults), {
+    ...payload,
+    submittedAt: serverTimestamp(),
+    createdAt: serverTimestamp(),
+  });
+  return { id: ref.id, ...payload };
+};
+
+export const getLatestGuideQuizResult = async ({ userId, role }) => {
+  logStage('getLatestGuideQuizResult:start', { userId, role });
+  if (!userId) return null;
+
+  if (!isFirebaseConfigured) {
+    return [...demoGuideQuizResults]
+      .filter((item) => item.userId === userId && (!role || item.role === role))
+      .sort((left, right) => new Date(right.submittedAt ?? 0) - new Date(left.submittedAt ?? 0))[0] ?? null;
+  }
+
+  ensureDb();
+  const q = query(
+    collection(db, collections.guideQuizResults),
+    where('userId', '==', userId),
+    ...(role ? [where('role', '==', role)] : []),
+    orderBy('submittedAt', 'desc'),
+    limit(1),
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs[0] ? { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } : null;
+};
+
+export const getGuideQuizResultsSummary = async () => {
+  logStage('getGuideQuizResultsSummary:start');
+
+  if (!isFirebaseConfigured) {
+    const users = demoUsers.filter((user) => user.role === 'student' || user.role === 'tutor');
+    return {
+      students: users
+        .filter((user) => user.role === 'student')
+        .map((user) => {
+          const latest = [...demoGuideQuizResults]
+            .filter((item) => item.userId === user.uid && item.role === 'student')
+            .sort((left, right) => new Date(right.submittedAt ?? 0) - new Date(left.submittedAt ?? 0))[0] ?? null;
+          return {
+            id: user.uid,
+            name: user.displayName || user.email || 'Student',
+            percentage: latest?.percentage ?? null,
+          };
+        }),
+      tutors: users
+        .filter((user) => user.role === 'tutor')
+        .map((user) => {
+          const latest = [...demoGuideQuizResults]
+            .filter((item) => item.userId === user.uid && item.role === 'tutor')
+            .sort((left, right) => new Date(right.submittedAt ?? 0) - new Date(left.submittedAt ?? 0))[0] ?? null;
+          return {
+            id: user.uid,
+            name: user.displayName || user.email || 'Tutor',
+            percentage: latest?.percentage ?? null,
+          };
+        }),
+    };
+  }
+
+  ensureDb();
+  const usersSnapshot = await getDocs(collection(db, collections.users));
+  const resultsSnapshot = await getDocs(query(collection(db, collections.guideQuizResults), orderBy('submittedAt', 'desc')));
+  const resultsByUser = new Map();
+
+  resultsSnapshot.docs.forEach((item) => {
+    const data = { id: item.id, ...item.data() };
+    if (!resultsByUser.has(data.userId)) {
+      resultsByUser.set(data.userId, data);
+    }
+  });
+
+  const users = usersSnapshot.docs.map((item) => item.data()).filter((user) => user.role === 'student' || user.role === 'tutor');
+  const buildRow = (user) => ({
+    id: user.uid,
+    name: user.displayName || user.email || (user.role === 'student' ? 'Student' : 'Tutor'),
+    percentage: resultsByUser.get(user.uid)?.percentage ?? null,
+  });
+
+  return {
+    students: users.filter((user) => user.role === 'student').map(buildRow),
+    tutors: users.filter((user) => user.role === 'tutor').map(buildRow),
+  };
 };

@@ -12,12 +12,14 @@ const navigationByRole = {
     { to: '/student/peer-reviews', label: 'Peer reviews', icon: ClipboardCheck },
     { to: '/student/billing', label: 'Billing', icon: CreditCard },
     { to: '/student/profile', label: 'Profile', icon: FileText },
+    { to: '/student/guide', label: 'Examify Guide', icon: ClipboardCheck },
   ],
   [ROLES.TUTOR]: [
     { to: '/tutor', label: 'Overview', icon: LayoutDashboard },
     { to: '/tutor/students', label: 'Students', icon: Users },
     { to: '/tutor/papers', label: 'Past papers', icon: BookOpen },
     { to: '/tutor/reports', label: 'Reports', icon: FileText },
+    { to: '/tutor/guide', label: 'Examify Guide', icon: ClipboardCheck },
   ],
   [ROLES.ADMIN]: [
     { to: '/admin', label: 'Overview', icon: LayoutDashboard },

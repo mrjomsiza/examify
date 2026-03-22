@@ -16,6 +16,7 @@ export const collections = {
   subscriptions: 'subscriptions',
   subscriptionAuthorizations: 'subscriptionAuthorizations',
   payments: 'payments',
+  guideQuizResults: 'guideQuizResults',
   notifications: 'notifications',
   settings: 'settings',
 };

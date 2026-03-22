@@ -58,7 +58,7 @@ export const LoginPage = () => {
           <button type="submit" className="btn-primary w-full">Login</button>
           <button type="button" onClick={() => loginWithGoogle().then((result) => redirectByRole(result.profile.role)).catch((error) => setStatus(error.message))} className="btn-secondary w-full">Continue with Google</button>
           {status ? <p className="text-sm text-rose-600">{status}</p> : null}
-          <p className="text-sm text-slate-500">{isDemoMode ? 'Demo mode is active until Firebase variables are configured.' : 'Live Firebase mode is active.'}</p>
+          <p className="text-sm text-slate-500">{isDemoMode ? 'Demo mode is active until live services are configured.' : 'Live mode is active.'}</p>
           <p className="text-sm text-slate-500">Need an account? <Link to="/signup" className="font-semibold text-brand-700">Create one</Link>.</p>
         </form>
       </div>
