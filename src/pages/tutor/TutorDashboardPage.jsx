@@ -148,13 +148,12 @@ export const TutorDashboardPage = () => {
         studentId: activeStudentFirestoreId,
       });
 
-      const newEntryFormatted = `--- Report for: ${
-        activeStudent.displayName || activeStudent.name || 'Student'
-      } ---
+      const newEntryFormatted = `
+      --- Report for: ${activeStudent.displayName || activeStudent.name || 'Student'} ---
 
-Report Entry:
-${reportNote}
-Date: ${new Date().toLocaleString()}`;
+      Report Entry:
+      ${reportNote}
+      Date: ${new Date().toLocaleString()}`;
 
       await setDoc(
         doc(db, 'users', activeStudentFirestoreId),
@@ -199,12 +198,14 @@ Date: ${new Date().toLocaleString()}`;
 
       const existingReport = activeStudent.latestReport || '';
 
-      const newEntryFormatted = `--- ${lessonForm.topic} ---
-Topic: ${lessonForm.topic}
-Tutor Topic Report:
-${lessonForm.topicReport}
-Understanding Level: ${Number(lessonForm.understandingLevel)}/10
-Date: ${new Date().toLocaleString()}`;
+      const newEntryFormatted = `
+        --- ${lessonForm.topic} ---
+        Topic: ${lessonForm.topic}
+        Tutor Topic Report:
+        ${lessonForm.topicReport}
+        Understanding Level: ${Number(lessonForm.understandingLevel)}/10
+        Date: ${new Date().toLocaleString()}
+      `;
 
       const updatedReport = `${existingReport}${existingReport ? '\n\n' : ''}${newEntryFormatted}`;
 
