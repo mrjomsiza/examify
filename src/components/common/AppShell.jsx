@@ -7,7 +7,7 @@ import { ROLES } from '../../lib/constants';
 const navigationByRole = {
   [ROLES.STUDENT]: [
     { to: '/student', label: 'Overview', icon: LayoutDashboard },
-    { to: '/student/exercises', label: 'Exercises', icon: BookOpen },
+    // { to: '/student/exercises', label: 'Exercises', icon: BookOpen },
     { to: '/student/papers', label: 'Past papers', icon: BookOpen },
     { to: '/student/peer-reviews', label: 'Peer reviews', icon: ClipboardCheck },
     { to: '/student/billing', label: 'Billing', icon: CreditCard },

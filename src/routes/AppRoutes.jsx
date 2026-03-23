@@ -19,6 +19,7 @@ import { AdminSettingsPage } from '../pages/admin/AdminSettingsPage';
 import { PastExamPapersPage } from '../pages/PastExamPapersPage';
 import { GuidePage } from '../pages/GuidePage';
 import { ROLES } from '../lib/constants';
+import { PoliciesPage } from '../pages/PoliciesPage';
 
 export const AppRoutes = () => (
   <Routes>
@@ -26,6 +27,7 @@ export const AppRoutes = () => (
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/policies" element={<PoliciesPage />} />
     </Route>
 
     <Route element={<ProtectedRoute allowedRoles={[ROLES.STUDENT]} />}>
@@ -36,6 +38,7 @@ export const AppRoutes = () => (
       <Route path="/student/profile" element={<StudentProfilePage />} />
       <Route path="/student/papers" element={<PastExamPapersPage />} />
       <Route path="/student/guide" element={<GuidePage role="student" />} />
+      <Route path="/policies" element={<PoliciesPage />} />
     </Route>
 
     <Route element={<ProtectedRoute allowedRoles={[ROLES.TUTOR]} />}>
@@ -44,6 +47,7 @@ export const AppRoutes = () => (
       <Route path="/tutor/papers" element={<PastExamPapersPage />} />
       <Route path="/tutor/reports" element={<TutorReportsPage />} />
       <Route path="/tutor/guide" element={<GuidePage role="tutor" />} />
+      <Route path="/policies" element={<PoliciesPage />} />
     </Route>
 
     <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]} />}>
@@ -52,6 +56,7 @@ export const AppRoutes = () => (
       <Route path="/admin/payments" element={<AdminPaymentsPage />} />
       <Route path="/admin/settings" element={<AdminSettingsPage />} />
       <Route path="/admin/papers" element={<PastExamPapersPage />} />
+      <Route path="/policies" element={<PoliciesPage />} />
     </Route>
 
     <Route path="*" element={<Navigate to="/" replace />} />

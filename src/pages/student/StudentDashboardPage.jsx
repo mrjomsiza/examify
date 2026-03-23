@@ -23,6 +23,38 @@ export const StudentDashboardPage = () => {
   const [accessState, setAccessState] = useState(null);
   const [tutorProfile, setTutorProfile] = useState(null);
 
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationMode, setGenerationMode] = useState('idle');
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [generationMessage, setGenerationMessage] = useState('');
+
+  const runGeneratePlan = async (mode) => {
+    setIsGenerating(true);
+    setGenerationMode(mode);
+    setGenerationProgress(10);
+    setGenerationMessage(`${mode === 'initial' ? 'Initial' : 'Weekly'} AI generation started...`);
+
+    try {
+      const result = await generateExercisePlanIfEligible({ student: profile, mode });
+      setGenerationProgress(60);
+
+      if (result?.generated) {
+        setGenerationMessage(`AI ${mode} generation complete: ${result.assignments?.length ?? 0} exercise(s) assigned.`);
+      } else {
+        setGenerationMessage(`AI ${mode} generation did not run: ${result?.reason ?? 'criteria not met'}.`);
+      }
+
+      setGenerationProgress(100);
+      return result;
+    } catch (error) {
+      setGenerationMessage(`AI ${mode} generation failed: ${error?.message ?? 'unexpected error'}.`);
+      setGenerationProgress(100);
+      return null;
+    } finally {
+      setTimeout(() => setIsGenerating(false), 400);
+    }
+  };
+
   useEffect(() => {
     if (profile?.tutorId) {
       const unsubscribe = subscribeToUserProfile(profile.tutorId, setTutorProfile);
@@ -55,8 +87,47 @@ export const StudentDashboardPage = () => {
         }
 
         if (studentAccess.initialGenerationReady) {
-          const generationResult = await generateExercisePlanIfEligible({ student: profile, mode: 'initial' });
+          const generationResult = await runGeneratePlan('initial');
           console.log('[Examify][StudentDashboard] initialGenerationResult', generationResult);
+
+          if (generationResult?.generated) {
+            const [updatedData, updatedHistory, updatedAccess, updatedToday] = await Promise.all([
+              getRoleDashboardData('student', { studentId: profile?.uid }),
+              getExerciseHistory(profile?.uid),
+              getStudentAccessState(profile),
+              getTodayExercise(profile?.uid),
+            ]);
+
+            setDashboard({
+              ...updatedData,
+              todayExercise: updatedToday ?? updatedData.todayExercise ?? null,
+              paymentCompleted: updatedAccess.paymentCompleted,
+              generationStatus: updatedAccess.generationStatus,
+            });
+            setHistory(updatedHistory);
+            setAccessState(updatedAccess);
+          }
+        } else if (studentAccess.weeklyGenerationReady) {
+          const generationResult = await runGeneratePlan('weekly');
+          console.log('[Examify][StudentDashboard] weeklyGenerationResult', generationResult);
+
+          if (generationResult?.generated) {
+            const [updatedData, updatedHistory, updatedAccess, updatedToday] = await Promise.all([
+              getRoleDashboardData('student', { studentId: profile?.uid }),
+              getExerciseHistory(profile?.uid),
+              getStudentAccessState(profile),
+              getTodayExercise(profile?.uid),
+            ]);
+
+            setDashboard({
+              ...updatedData,
+              todayExercise: updatedToday ?? updatedData.todayExercise ?? null,
+              paymentCompleted: updatedAccess.paymentCompleted,
+              generationStatus: updatedAccess.generationStatus,
+            });
+            setHistory(updatedHistory);
+            setAccessState(updatedAccess);
+          }
         }
       } catch (error) {
         setDashboard((current) => current ?? { stats: [], todayExercise: null, feedback: [], peerReviewAssignment: null });
@@ -99,6 +170,19 @@ export const StudentDashboardPage = () => {
       ) : null}
 
       {loadError ? <div className="panel p-4 text-sm text-amber-700">{loadError}</div> : null}
+
+      {isGenerating ? (
+        <div className="panel mb-4 p-4">
+          <p className="font-medium text-slate-700">{generationMessage}</p>
+          <div className="mt-3 h-2 w-full rounded-full bg-slate-200">
+            <div
+              className="h-full rounded-full bg-brand-600 transition-all duration-300"
+              style={{ width: `${Math.min(100, Math.max(0, generationProgress))}%` }}
+            />
+          </div>
+          <p className="mt-2 text-xs text-slate-500">{Math.min(100, Math.max(0, generationProgress))}%</p>
+        </div>
+      ) : null}
       
       <section className="flex">
         {!paymentLocked && todayExercise && availability ? (

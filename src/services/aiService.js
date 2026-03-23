@@ -170,6 +170,8 @@ Additional mandatory generation rules:
 - For weekly mode, question references on the same day must come from different topics.
 - When more than three topics are available, bias selections toward higher understanding topics, while still occasionally including lower understanding topics.
 - Only use the selected source papers and include only those ids in paperIdsUsed.
+- NEVER REPEAT the same question for different assignments dates, unless the number total number of questions in the given past papers is not enough or is less than 7.
+- An Exercise generation can have multiple papers references, for example assignedment date 1 from paper A and assignment date 2 paper B, this will give you multiple options to work with.
 `;
 
 export const recommendExercises = async (payload = {}) => {

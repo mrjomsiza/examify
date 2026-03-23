@@ -1,17 +1,31 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { BookOpen, BrainCircuit, ShieldCheck, Users } from 'lucide-react';
 
-const demoAccounts = [
-  { label: 'Student demo', email: 'student@example.com' },
-  { label: 'Tutor demo', email: 'tutor@example.com' },
-  { label: 'Admin demo', email: 'admin@example.com' },
+const features = [
+  {
+    title: 'Daily Maths exercises that unlock progressively',
+    icon: BookOpen,
+  },
+  {
+    title: 'Peer marking after submission',
+    icon: Users,
+  },
+  {
+    title: 'Tutor-led topic tracking and reports',
+    icon: ShieldCheck,
+  },
+  {
+    title: 'AI recommendations grounded in real data',
+    icon: BrainCircuit,
+  },
 ];
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, loginAsDemo, loginWithGoogle, isDemoMode } = useAuth();
-  const [form, setForm] = useState({ email: 'student@example.com', password: 'password123' });
+  const { login } = useAuth();
+  const [form, setForm] = useState({ email: 'something@example.com', password: 'password123' });
   const [status, setStatus] = useState('');
 
   const redirectByRole = (role) => navigate(`/${role}`);
@@ -33,11 +47,11 @@ export const LoginPage = () => {
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200">Access Examify</p>
           <h1 className="mt-4 text-4xl font-bold">Welcome to Examify.</h1>
           <div className="mt-8 space-y-3">
-            {demoAccounts.map((account) => (
-              <button key={account.email} type="button" onClick={() => loginAsDemo(account.email).then((profile) => redirectByRole(profile.role))} className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm hover:border-brand-400/50">
-                <span>{account.label}</span>
-                <span className="text-slate-400">{account.email}</span>
-              </button>
+            {features.map(({ title, icon: Icon }) => (
+              <div key={title} className="panel p-6 hover:-translate-y-2 transition">
+                <Icon className="h-6 w-6 text-brand-700" />
+                <p className="mt-3 text-sm text-slate-600">{title}</p>
+              </div>
             ))}
           </div>
         </div>
@@ -55,10 +69,22 @@ export const LoginPage = () => {
             <span className="label">Password</span>
             <input type="password" className="input" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} />
           </label>
+          <div className="md:col-span-2 flex items-start gap-3 text-sm text-slate-600">
+            <p>
+              By login in you agree to Examify {' '}
+              <Link to="/policies#terms" className="font-semibold text-brand-700">
+                Terms of Service
+              </Link>,{' '}
+              <Link to="/policies#refund" className="font-semibold text-brand-700">
+                Refund & Cancellation Policy
+              </Link>, and acknowledge that you have read and understood them, our contact information for any queries {' '}
+              <Link to="/policies#contact" className="font-semibold text-brand-700">
+                Contact Information
+              </Link>.
+            </p>
+          </div>
           <button type="submit" className="btn-primary w-full">Login</button>
-          <button type="button" onClick={() => loginWithGoogle().then((result) => redirectByRole(result.profile.role)).catch((error) => setStatus(error.message))} className="btn-secondary w-full">Continue with Google</button>
           {status ? <p className="text-sm text-rose-600">{status}</p> : null}
-          <p className="text-sm text-slate-500">{isDemoMode ? 'Demo mode is active until live services are configured.' : 'Live mode is active.'}</p>
           <p className="text-sm text-slate-500">Need an account? <Link to="/signup" className="font-semibold text-brand-700">Create one</Link>.</p>
         </form>
       </div>

@@ -398,7 +398,7 @@ const selectSourcePapers = ({ papers = [], assignmentHistory = [] }) => {
 const buildAssignmentDates = ({ mode, assignmentHistory = [] }) => {
   const lastAssignmentDate = getLastAssignmentDate(assignmentHistory);
   const baseDate = lastAssignmentDate ? addDays(new Date(lastAssignmentDate), 1) : new Date();
-  const daysToCreate = mode === 'weekly' ? WEEKLY_EXERCISE_DAYS : 1;
+  const daysToCreate = mode === 'weekly' ? WEEKLY_EXERCISE_DAYS : 7;
 
   return Array.from({ length: daysToCreate }, (_, dayIndex) =>
     formatISO(addDays(baseDate, dayIndex), { representation: 'date' }),
@@ -749,6 +749,18 @@ export const getAllQuestionPapers = async () => {
   ensureDb();
   const snapshot = await getDocs(query(collection(db, collections.questionPapers), orderBy('year', 'desc')));
   return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+};
+
+export const getQuestionPapersByIds = async (ids) => {
+  logStage('getQuestionPapersByIds:start', { ids });
+  if (!isFirebaseConfigured) {
+    return mockQuestionPapers.filter((paper) => ids.includes(paper.id));
+  }
+
+  ensureDb();
+  const promises = ids.map((id) => getDoc(doc(db, collections.questionPapers, id)));
+  const snapshots = await Promise.all(promises);
+  return snapshots.filter((snap) => snap.exists()).map((snap) => ({ id: snap.id, ...snap.data() }));
 };
 
 export const saveQuestionPaper = async (paper) => {

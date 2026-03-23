@@ -25,7 +25,6 @@ export const PastExamPapersPage = () => {
 
   useEffect(() => {
     const load = async () => {
-      console.log('[Examify][PastPapers] load:start', { role });
       const result = await getAllQuestionPapers();
       setPapers(result);
     };

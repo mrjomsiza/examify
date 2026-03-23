@@ -26,7 +26,7 @@ export const StudentBillingPage = () => {
   const quote = useMemo(
     () =>
       getSubscriptionQuote({
-        latestMark: profile?.latestMark ?? profile?.previousYearMark ?? 0,
+        latestMark:  profile?.previousYearMark ?? 0,
         sessionType: profile?.sessionType ?? 'online',
       }),
     [profile],
@@ -85,12 +85,10 @@ export const StudentBillingPage = () => {
       setIsInitializingPayment(true);
       setStatus('');
 
-      console.log('[Examify][Billing] payment:start', { studentId: profile?.uid });
-
       const result = await initializeSubscriptionPayment({
         email: profile?.email,
         studentId: profile?.uid,
-        latestMark: profile?.latestMark ?? profile?.previousYearMark,
+        latestMark:  profile?.previousYearMark ?? 0,
         sessionType: profile?.sessionType ?? 'online',
       });
 
@@ -101,7 +99,6 @@ export const StudentBillingPage = () => {
       setStatus('Redirecting you to Paystack...');
       window.location.href = result.authorizationUrl;
     } catch (error) {
-      console.error('[Examify][Billing] payment:start:error', error);
       setStatus(error?.message || 'Unable to initialize payment right now.');
     } finally {
       setIsInitializingPayment(false);
@@ -181,7 +178,7 @@ export const StudentBillingPage = () => {
         </div>
 
         <div className="panel p-5">
-          <p className="text-sm text-slate-500">Recommended sessions</p>
+          <p className="text-sm text-slate-500">Sessions</p>
           <p className="mt-2 text-2xl font-bold text-slate-950">{quote.sessionCount}</p>
         </div>
 

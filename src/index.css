@@ -9,6 +9,10 @@
   color: #e2e8f0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   min-width: 320px;
