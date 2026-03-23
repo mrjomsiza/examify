@@ -1,8 +1,27 @@
 import { getGenerativeModel } from 'firebase/ai';
 import { ai, firebaseAiModel, isFirebaseConfigured } from '../firebase/config';
 
-const stripCodeFence = (text) => text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '').trim();
-const fallbackRecommendations = {
+const stripCodeFence = (text = '') =>
+  String(text)
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/\s*```$/, '')
+    .trim();
+
+const extractJsonObject = (text = '') => {
+  const trimmed = String(text).trim();
+
+  const firstBrace = trimmed.indexOf('{');
+  const lastBrace = trimmed.lastIndexOf('}');
+
+  if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+    return trimmed;
+  }
+
+  return trimmed.slice(firstBrace, lastBrace + 1);
+};
+
+const getFallbackRecommendations = () => ({
   recommendations: [
     {
       title: 'Awaiting AI recommendation',
@@ -12,6 +31,22 @@ const fallbackRecommendations = {
     },
   ],
   source: 'fallback',
+});
+
+const normalizeRecommendations = (parsed) => {
+  const recommendations = Array.isArray(parsed?.recommendations)
+    ? parsed.recommendations
+    : [];
+
+  return {
+    recommendations: recommendations.map((item, index) => ({
+      title: item?.title || `Recommendation ${index + 1}`,
+      topic: item?.topic || 'Mathematics topic',
+      reason: item?.reason || 'No reason provided.',
+      sourceLabel: item?.sourceLabel || 'AI recommendation',
+    })),
+    source: 'firebase-ai-logic',
+  };
 };
 
 const buildPrompt = ({
@@ -22,7 +57,7 @@ const buildPrompt = ({
   pastMarks = [],
   questionPaperMetadata = [],
   tutorNotes = '',
-}) => `
+} = {}) => `
 You are Examify's Mathematics exercise recommendation assistant for South African grades.
 
 Business rules:
@@ -32,6 +67,25 @@ Business rules:
 - Consider grade, region, tutor reports, tutor notes, question paper metadata, and past marks.
 - Return strict JSON with a top-level key called "recommendations".
 - Each recommendation must include: title, topic, reason, sourceLabel.
+- Return only valid JSON.
+- Use double quotes for all property names and string values.
+- Do not include markdown.
+- Do not include code fences.
+- Do not include comments.
+- Do not include trailing commas.
+- Do not include any explanation before or after the JSON.
+
+Example format:
+{
+  "recommendations": [
+    {
+      "title": "Factorisation drill",
+      "topic": "Factorisation of trinomials",
+      "reason": "Tutor completed this topic and the learner needs reinforcement.",
+      "sourceLabel": "2023 Gauteng June Paper, Q4.2"
+    }
+  ]
+}
 
 Student grade: ${grade ?? 'Unknown'}
 Region: ${region ?? 'Unknown'}
@@ -42,8 +96,9 @@ Past marks: ${JSON.stringify(pastMarks)}
 Question paper metadata: ${JSON.stringify(questionPaperMetadata)}
 `;
 
-export const recommendExercises = async (payload) => {
+export const recommendExercises = async (payload = {}) => {
   console.log('[Examify][AI] recommendExercises:start', payload);
+
   if (!isFirebaseConfigured) {
     return {
       recommendations: [
@@ -61,7 +116,7 @@ export const recommendExercises = async (payload) => {
   try {
     if (!ai) {
       console.log('[Examify][AI] recommendExercises:fallback:no-ai-instance');
-      return fallbackRecommendations;
+      return getFallbackRecommendations();
     }
 
     const model = getGenerativeModel(ai, {
@@ -69,17 +124,24 @@ export const recommendExercises = async (payload) => {
     });
 
     const result = await model.generateContent(buildPrompt(payload));
-    const text = stripCodeFence(result.response.text());
-    const parsed = JSON.parse(text);
+    const rawText = result?.response?.text?.() ?? '';
+    const strippedText = stripCodeFence(rawText);
+    const jsonText = extractJsonObject(strippedText);
 
-    const response = {
-      ...parsed,
-      source: 'firebase-ai-logic',
-    };
+    console.log('[Examify][AI] recommendExercises:rawText', rawText);
+    console.log('[Examify][AI] recommendExercises:jsonText', jsonText);
+
+    const parsed = JSON.parse(jsonText);
+
+    if (!parsed || !Array.isArray(parsed.recommendations)) {
+      throw new Error('Invalid AI response format: recommendations array missing.');
+    }
+
+    const response = normalizeRecommendations(parsed);
     console.log('[Examify][AI] recommendExercises:success', response);
     return response;
   } catch (error) {
     console.error('[Examify][AI] recommendExercises:error', error);
-    return fallbackRecommendations;
+    return getFallbackRecommendations();
   }
 };
