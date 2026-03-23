@@ -5,7 +5,7 @@ import { uploadSubmissionImage } from '../../services/storageService';
 import { canSubmitPeerReview } from '../../utils/exerciseRules';
 import { getQuestionPapersByIds } from '../../services/firestoreService';
 
-export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId, dashboard }) => {
+export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId, dashboard, submitted = false }) => {
   const [openingPapers, setOpeningPapers] = useState(false);
 
   const handleOpenPapers = async () => {
@@ -53,7 +53,11 @@ export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId,
       )}
       <div className="mt-6 flex flex-wrap gap-3">
         {availability.state === 'active' ? (
-          !paymentLocked && exercise ? (
+          submitted ? (
+            <div className="panel flex min-h-56 items-center justify-center p-6 text-center text-sm text-slate-500">
+              Work submitted for today. Wait for tutor feedback and tomorrow's exercise.
+            </div>
+          ) : !paymentLocked && exercise ? (
             <SubmissionUpload
               exerciseId={exercise.id}
               onSubmit={({ file, exerciseId }) => uploadSubmissionImage({ file, exerciseId, studentId })}

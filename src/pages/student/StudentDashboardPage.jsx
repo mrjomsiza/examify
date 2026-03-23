@@ -7,9 +7,12 @@ import { useAuth } from '../../hooks/useAuth';
 import { canOpenExercise, getExerciseAvailability } from '../../utils/exerciseRules';
 import {
   generateExercisePlanIfEligible,
+  getCurrentWeekExercises,
   getExerciseHistory,
+  getFutureExercises,
   getRoleDashboardData,
   getStudentAccessState,
+  getSubmissionForExercise,
   getTodayExercise,
   subscribeToUserProfile,
 } from '../../services/firestoreService';
@@ -19,6 +22,8 @@ export const StudentDashboardPage = () => {
   const { profile, logout } = useAuth();
   const [dashboard, setDashboard] = useState(null);
   const [history, setHistory] = useState([]);
+  const [currentWeek, setCurrentWeek] = useState([]);
+  const [futureExercises, setFutureExercises] = useState([]);
   const [loadError, setLoadError] = useState('');
   const [accessState, setAccessState] = useState(null);
   const [tutorProfile, setTutorProfile] = useState(null);
@@ -27,6 +32,8 @@ export const StudentDashboardPage = () => {
   const [generationMode, setGenerationMode] = useState('idle');
   const [generationProgress, setGenerationProgress] = useState(0);
   const [generationMessage, setGenerationMessage] = useState('');
+
+  const [viewMode, setViewMode] = useState('current');
 
   const runGeneratePlan = async (mode) => {
     setIsGenerating(true);
@@ -69,16 +76,26 @@ export const StudentDashboardPage = () => {
       try {
         const data = await getRoleDashboardData('student', { studentId: profile?.uid });
         const exerciseHistory = await getExerciseHistory(profile?.uid);
+        const currentWeekExercises = await getCurrentWeekExercises(profile?.uid);
+        const futureExs = await getFutureExercises(profile?.uid);
         const studentAccess = await getStudentAccessState(profile);
         const liveTodayExercise = await getTodayExercise(profile?.uid);
 
+        let todaySubmitted = false;
+        if (liveTodayExercise?.id) {
+          const submission = await getSubmissionForExercise(liveTodayExercise.id);
+          todaySubmitted = Boolean(submission);
+        }
+
         setDashboard({
           ...data,
-          todayExercise: liveTodayExercise ?? data.todayExercise ?? null,
+          todayExercise: liveTodayExercise ? { ...liveTodayExercise, submitted: todaySubmitted } : null,
           paymentCompleted: studentAccess.paymentCompleted,
           generationStatus: studentAccess.generationStatus,
         });
         setHistory(exerciseHistory);
+        setCurrentWeek(currentWeekExercises);
+        setFutureExercises(futureExs);
         setAccessState(studentAccess);
 
         if (!studentAccess.paymentCompleted) {
@@ -91,20 +108,30 @@ export const StudentDashboardPage = () => {
           console.log('[Examify][StudentDashboard] initialGenerationResult', generationResult);
 
           if (generationResult?.generated) {
-            const [updatedData, updatedHistory, updatedAccess, updatedToday] = await Promise.all([
+            const [updatedData, updatedHistory, updatedCurrentWeek, updatedFuture, updatedAccess, updatedToday] = await Promise.all([
               getRoleDashboardData('student', { studentId: profile?.uid }),
               getExerciseHistory(profile?.uid),
+              getCurrentWeekExercises(profile?.uid),
+              getFutureExercises(profile?.uid),
               getStudentAccessState(profile),
               getTodayExercise(profile?.uid),
             ]);
 
+            let todaySubmitted = false;
+            if (updatedToday?.id) {
+              const submission = await getSubmissionForExercise(updatedToday.id);
+              todaySubmitted = Boolean(submission);
+            }
+
             setDashboard({
               ...updatedData,
-              todayExercise: updatedToday ?? updatedData.todayExercise ?? null,
+              todayExercise: updatedToday ? { ...updatedToday, submitted: todaySubmitted } : null,
               paymentCompleted: updatedAccess.paymentCompleted,
               generationStatus: updatedAccess.generationStatus,
             });
             setHistory(updatedHistory);
+            setCurrentWeek(updatedCurrentWeek);
+            setFutureExercises(updatedFuture);
             setAccessState(updatedAccess);
           }
         } else if (studentAccess.weeklyGenerationReady) {
@@ -112,20 +139,30 @@ export const StudentDashboardPage = () => {
           console.log('[Examify][StudentDashboard] weeklyGenerationResult', generationResult);
 
           if (generationResult?.generated) {
-            const [updatedData, updatedHistory, updatedAccess, updatedToday] = await Promise.all([
+            const [updatedData, updatedHistory, updatedCurrentWeek, updatedFuture, updatedAccess, updatedToday] = await Promise.all([
               getRoleDashboardData('student', { studentId: profile?.uid }),
               getExerciseHistory(profile?.uid),
+              getCurrentWeekExercises(profile?.uid),
+              getFutureExercises(profile?.uid),
               getStudentAccessState(profile),
               getTodayExercise(profile?.uid),
             ]);
 
+            let todaySubmitted = false;
+            if (updatedToday?.id) {
+              const submission = await getSubmissionForExercise(updatedToday.id);
+              todaySubmitted = Boolean(submission);
+            }
+
             setDashboard({
               ...updatedData,
-              todayExercise: updatedToday ?? updatedData.todayExercise ?? null,
+              todayExercise: updatedToday ? { ...updatedToday, submitted: todaySubmitted } : null,
               paymentCompleted: updatedAccess.paymentCompleted,
               generationStatus: updatedAccess.generationStatus,
             });
             setHistory(updatedHistory);
+            setCurrentWeek(updatedCurrentWeek);
+            setFutureExercises(updatedFuture);
             setAccessState(updatedAccess);
           }
         }
@@ -188,10 +225,11 @@ export const StudentDashboardPage = () => {
         {!paymentLocked && todayExercise && availability ? (
           <ExerciseCard 
             exercise={todayExercise} 
-            availability={availability} 
+            availability={availability}
             paymentLocked={paymentLocked}
             studentId={profile?.uid}
             dashboard={dashboard}
+            submitted={todayExercise.submitted}
           />
         ) : (
           <div className="panel flex min-h-72 items-center justify-center p-6 text-center text-sm text-slate-500 w-full">
@@ -202,9 +240,29 @@ export const StudentDashboardPage = () => {
 
       <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
         <div className="space-y-6">
-          <SectionHeader eyebrow="History" title="Exercise history" description="Past exercises remain visible for reference. Missed work is locked, and tomorrow’s exercises stay unavailable." />
+          <SectionHeader eyebrow="Exercises" title={viewMode === 'current' ? 'Current Week' : viewMode === 'past' ? 'Past Exercises' : 'Future Exercises'} description={viewMode === 'current' ? 'Today and the next 6 days of assigned exercises.' : viewMode === 'past' ? 'Previously completed exercises for reference.' : 'Exercises scheduled beyond the current week.'} />
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setViewMode('current')}
+              className={`btn ${viewMode === 'current' ? 'btn-primary' : 'btn-secondary'}`}
+            >
+              Current Week
+            </button>
+            <button
+              onClick={() => setViewMode('past')}
+              className={`btn ${viewMode === 'past' ? 'btn-primary' : 'btn-secondary'}`}
+            >
+              View Past
+            </button>
+            <button
+              onClick={() => setViewMode('future')}
+              className={`btn ${viewMode === 'future' ? 'btn-primary' : 'btn-secondary'}`}
+            >
+              View Future
+            </button>
+          </div>
           <div className="space-y-4">
-            {history.map((exercise) => {
+            {(viewMode === 'current' ? currentWeek : viewMode === 'past' ? history : futureExercises).map((exercise) => {
               const itemAvailability = getExerciseAvailability(exercise.assignmentDate, exercise.submitted);
               return (
                 <div key={exercise.id} className="panel flex flex-col gap-3 p-5 md:flex-row md:items-center md:justify-between">

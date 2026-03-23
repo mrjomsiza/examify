@@ -303,6 +303,46 @@ export const getExerciseHistory = async (studentId) => {
   return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
 };
 
+export const getCurrentWeekExercises = async (studentId) => {
+  logStage('getCurrentWeekExercises:start', { studentId });
+  if (!isFirebaseConfigured) {
+    const all = buildStudentDashboard(studentId).exerciseHistory ?? [];
+    const today = new Date().toISOString().slice(0, 10);
+    return all.filter((ex) => ex.assignmentDate >= today).slice(0, 7);
+  }
+  ensureDb();
+  const today = new Date().toISOString().slice(0, 10);
+  const q = query(
+    collection(db, collections.dailyExerciseAssignments),
+    where('studentId', '==', studentId),
+    where('assignmentDate', '>=', today),
+    orderBy('assignmentDate', 'asc'),
+    limit(7),
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+};
+
+export const getFutureExercises = async (studentId) => {
+  logStage('getFutureExercises:start', { studentId });
+  if (!isFirebaseConfigured) {
+    const all = buildStudentDashboard(studentId).exerciseHistory ?? [];
+    const weekFromToday = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    return all.filter((ex) => ex.assignmentDate > weekFromToday);
+  }
+  ensureDb();
+  const weekFromToday = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const q = query(
+    collection(db, collections.dailyExerciseAssignments),
+    where('studentId', '==', studentId),
+    where('assignmentDate', '>', weekFromToday),
+    orderBy('assignmentDate', 'asc'),
+    limit(20),
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+};
+
 const getAssignmentHistory = async (studentId, maxRecords = GENERATION_HISTORY_LIMIT) => {
   if (!studentId) return [];
   if (!isFirebaseConfigured) return buildStudentDashboard(studentId).exerciseHistory ?? [];
@@ -820,6 +860,17 @@ export const getSubmissionById = async (submissionId) => {
   }
   ensureDb();
   const snapshot = await getDoc(doc(db, collections.submissions, submissionId));
+  return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+};
+
+export const getSubmissionForExercise = async (exerciseId) => {
+  logStage('getSubmissionForExercise:start', { exerciseId });
+  if (!isFirebaseConfigured) {
+    // Mock: assume no submission for demo
+    return null;
+  }
+  ensureDb();
+  const snapshot = await getDoc(doc(db, collections.submissions, exerciseId));
   return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
 };
 
