@@ -494,6 +494,7 @@ const buildAssignmentsFromAiRecommendations = ({
   mode,
   topicSummaries = [],
   maxQuestionsPerDay = MAX_DAILY_EXERCISES,
+  grade,
 }) =>
   recommendations.map((recommendation, index) => {
     let topicBreakdown = Array.isArray(recommendation?.topicBreakdown) && recommendation.topicBreakdown.length
@@ -534,6 +535,7 @@ const buildAssignmentsFromAiRecommendations = ({
       sourceLabel: recommendation.sourceLabel || selectedPapers.map((paper) => `${paper.year} ${paper.region} ${paper.month} paper`).join('; '),
       instruction: recommendation.instruction || recommendation.reason || 'Answer the referenced question number(s) only.',
       subject: SUBJECT,
+      grade,
       generatedBy: 'frontend-ai-service',
       generationMode: mode,
       generationBatchId,
@@ -959,6 +961,7 @@ export const generateExercisePlanIfEligible = async ({ student, mode, latestTuto
     mode,
     topicSummaries,
     maxQuestionsPerDay: aiPlan.maxQuestionsPerDay,
+    grade: student?.grade,
   }).filter((assignment) => Boolean(assignment.assignmentDate));
 
   if (!isFirebaseConfigured) {
