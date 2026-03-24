@@ -229,7 +229,6 @@ export const StudentDashboardPage = () => {
             paymentLocked={paymentLocked}
             studentId={profile?.uid}
             dashboard={dashboard}
-            submitted={todayExercise.submitted}
           />
         ) : (
           <div className="panel flex min-h-72 items-center justify-center p-6 text-center text-sm text-slate-500 w-full">

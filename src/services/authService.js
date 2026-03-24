@@ -13,10 +13,8 @@ import { collections } from '../firebase/schema';
 import { mockUsers } from '../data/mockData';
 
 const provider = isFirebaseConfigured ? new GoogleAuthProvider() : null;
-const logStage = (stage, payload = {}) => console.log(`[Examify][Auth] ${stage}`, payload);
 
 export const loginWithEmail = async ({ email, password }) => {
-  logStage('loginWithEmail:start', { email });
   if (!isFirebaseConfigured) {
     const mockUser = mockUsers[email];
     if (!mockUser) throw new Error('Demo account not found. Try student@example.com, tutor@example.com, or admin@example.com.');
@@ -29,7 +27,6 @@ export const loginWithEmail = async ({ email, password }) => {
 };
 
 export const registerWithEmail = async ({ fullName, email, password, role, extraProfile = {} }) => {
-  logStage('registerWithEmail:start', { email, role });
   const studentDefaults = role === 'student'
     ? {
       previousYearMark: Number(extraProfile.previousYearMark ?? 0),
@@ -71,7 +68,6 @@ export const registerWithEmail = async ({ fullName, email, password, role, extra
 };
 
 export const updateStudentOnboarding = async ({ uid, previousYearMark, sessionType }) => {
-  logStage('updateStudentOnboarding:start', { uid, previousYearMark, sessionType });
   if (!isFirebaseConfigured) {
     return { uid, previousYearMark, latestMark: previousYearMark, sessionType, paymentCompleted: false, subscriptionStatus: 'pending' };
   }
@@ -90,7 +86,6 @@ export const updateStudentOnboarding = async ({ uid, previousYearMark, sessionTy
 };
 
 export const markStudentPaymentComplete = async ({ uid, reference }) => {
-  logStage('markStudentPaymentComplete:start', { uid, reference });
   if (!isFirebaseConfigured) {
     return { uid, paymentCompleted: true, subscriptionStatus: 'active', latestPaymentReference: reference };
   }
@@ -133,7 +128,6 @@ export const logout = async () => {
 };
 
 export const updateUserProfileDetails = async ({ uid, displayName, previousYearMark, newPassword }) => {
-  logStage('updateUserProfileDetails:start', { uid });
 
   if (isFirebaseConfigured && auth?.currentUser) {
     if (displayName) {

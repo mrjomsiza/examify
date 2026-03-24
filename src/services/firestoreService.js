@@ -60,10 +60,6 @@ const ensureDb = () => {
 const demoUsers = Object.values(mockUsers);
 const demoGuideQuizResults = [...mockGuideQuizResults];
 
-const logStage = (stage, payload = {}) => {
-  console.log(`[Examify][Firestore] ${stage}`, payload);
-};
-
 const GENERATION_HISTORY_LIMIT = 40;
 
 const normalizeQuestionReferenceTitle = (references = []) =>
@@ -265,7 +261,6 @@ const buildStudentDashboard = (studentId) => {
 };
 
 export const getRoleDashboardData = async (role, options = {}) => {
-  logStage('getRoleDashboardData:start', { role, options });
   if (!isFirebaseConfigured) {
     if (role === 'student') return buildStudentDashboard(options.studentId ?? 'mock-student-1');
     if (role === 'tutor') return buildTutorDashboard();
@@ -275,7 +270,6 @@ export const getRoleDashboardData = async (role, options = {}) => {
 };
 
 export const getTodayExercise = async (studentId) => {
-  logStage('getTodayExercise:start', { studentId });
   if (!isFirebaseConfigured) return buildStudentDashboard(studentId).todayExercise;
   ensureDb();
   const today = new Date().toISOString().slice(0, 10);
@@ -290,21 +284,32 @@ export const getTodayExercise = async (studentId) => {
 };
 
 export const getExerciseHistory = async (studentId) => {
-  logStage('getExerciseHistory:start', { studentId });
   if (!isFirebaseConfigured) return buildStudentDashboard(studentId).exerciseHistory;
+  
   ensureDb();
+
+  // Create a string for 'today' in the user's local timezone (YYYY-MM-DD)
+  // This ensures "today" is relative to the person using the app.
+  const now = new Date();
+  const todayLocal = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, '0'),
+    String(now.getDate()).padStart(2, '0')
+  ].join('-');
+
   const q = query(
-    collection(db, collections.dailyExerciseAssignments),
+    collection(db, "dailyExerciseAssignments"),
     where('studentId', '==', studentId),
-    orderBy('assignmentDate', 'asc'),
-    limit(20),
+    where('assignmentDate', '<', todayLocal), // Strictly less than TODAY
+    orderBy('assignmentDate', 'desc'),        // Changed to 'desc' so newest history is first
+    limit(20)
   );
+
   const snapshot = await getDocs(q);
   return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
 };
 
 export const getCurrentWeekExercises = async (studentId) => {
-  logStage('getCurrentWeekExercises:start', { studentId });
   if (!isFirebaseConfigured) {
     const all = buildStudentDashboard(studentId).exerciseHistory ?? [];
     const today = new Date().toISOString().slice(0, 10);
@@ -324,7 +329,6 @@ export const getCurrentWeekExercises = async (studentId) => {
 };
 
 export const getFutureExercises = async (studentId) => {
-  logStage('getFutureExercises:start', { studentId });
   if (!isFirebaseConfigured) {
     const all = buildStudentDashboard(studentId).exerciseHistory ?? [];
     const weekFromToday = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -547,7 +551,6 @@ const buildAssignmentsFromAiRecommendations = ({
   });
 
 export const getStudentAccessState = async (student) => {
-  logStage('getStudentAccessState:start', { studentId: student?.uid });
   if (!student) {
     return {
       paymentCompleted: false,
@@ -623,7 +626,6 @@ export const getStudentAccessState = async (student) => {
 };
 
 export const getUnassignedStudents = async () => {
-  logStage('getUnassignedStudents:start');
   if (!isFirebaseConfigured) {
     return demoUsers.filter((user) => user.role === 'student' && !user.tutorId);
   }
@@ -636,7 +638,6 @@ export const getUnassignedStudents = async () => {
 };
 
 export const getAssignedStudentsForTutor = async (tutorId) => {
-  logStage('getAssignedStudentsForTutor:start', { tutorId });
   if (!isFirebaseConfigured) {
     return demoUsers.filter((user) => user.role === 'student' && user.tutorId === tutorId);
   }
@@ -647,7 +648,6 @@ export const getAssignedStudentsForTutor = async (tutorId) => {
 };
 
 export const getTutorReports = async (studentId) => {
-  logStage('getTutorReports:start', { studentId });
   if (!isFirebaseConfigured) {
     return mockTutorReports
       .filter((report) => !studentId || report.studentId === studentId)
@@ -663,7 +663,6 @@ export const getTutorReports = async (studentId) => {
 };
 
 export const saveTutorReport = async ({ reportId, studentId, tutorId, note, studentName }) => {
-  logStage('saveTutorReport:start', { reportId, studentId, tutorId });
   if (!isFirebaseConfigured) {
     return {
       id: reportId ?? `mock-report-${Date.now()}`,
@@ -695,7 +694,6 @@ export const saveTutorReport = async ({ reportId, studentId, tutorId, note, stud
 };
 
 export const getCompletedLessons = async (studentId) => {
-  logStage('getCompletedLessons:start', { studentId });
   if (!isFirebaseConfigured) {
     return mockCompletedLessons.filter((lesson) => !studentId || lesson.studentId === studentId);
   }
@@ -709,7 +707,6 @@ export const getCompletedLessons = async (studentId) => {
 };
 
 export const saveCompletedLesson = async ({ studentId, tutorId, topic, topicReport, understandingLevel, studentName }) => {
-  logStage('saveCompletedLesson:start', { studentId, tutorId, topic, understandingLevel });
   if (!isFirebaseConfigured) {
     return {
       id: `mock-lesson-${Date.now()}`,
@@ -739,7 +736,6 @@ export const saveCompletedLesson = async ({ studentId, tutorId, topic, topicRepo
 };
 
 export const assignStudentToTutor = async ({ studentId, tutorId }) => {
-  logStage('assignStudentToTutor:start', { studentId, tutorId });
   if (!isFirebaseConfigured) {
     return { id: 'mock-assignment', studentId, tutorId };
   }
@@ -767,7 +763,6 @@ export const assignStudentToTutor = async ({ studentId, tutorId }) => {
 };
 
 export const getQuestionPapers = async ({ grade, region, subject = SUBJECT } = {}) => {
-  logStage('getQuestionPapers:start', { grade, region, subject });
   if (!isFirebaseConfigured) {
     return filterQuestionPapers(mockQuestionPapers, { grade, region, subject, allowNational: true });
   }
@@ -781,7 +776,6 @@ export const getQuestionPapers = async ({ grade, region, subject = SUBJECT } = {
 };
 
 export const getAllQuestionPapers = async () => {
-  logStage('getAllQuestionPapers:start');
   if (!isFirebaseConfigured) {
     return mockQuestionPapers;
   }
@@ -792,7 +786,6 @@ export const getAllQuestionPapers = async () => {
 };
 
 export const getQuestionPapersByIds = async (ids) => {
-  logStage('getQuestionPapersByIds:start', { ids });
   if (!isFirebaseConfigured) {
     return mockQuestionPapers.filter((paper) => ids.includes(paper.id));
   }
@@ -804,7 +797,6 @@ export const getQuestionPapersByIds = async (ids) => {
 };
 
 export const saveQuestionPaper = async (paper) => {
-  logStage('saveQuestionPaper:start', paper);
   const existsInDemo = mockQuestionPapers.some((item) =>
     item.region === paper.region && item.subject === paper.subject && item.year === Number(paper.year) && item.month === paper.month,
   );
@@ -841,7 +833,6 @@ export const saveQuestionPaper = async (paper) => {
 };
 
 export const savePeerReview = async (payload) => {
-  logStage('savePeerReview:start', payload);
   if (!isFirebaseConfigured) return { id: 'mock-peer-review', ...payload };
   ensureDb();
   const ref = await addDoc(collection(db, collections.peerReviews), { ...payload, createdAt: serverTimestamp() });
@@ -849,7 +840,6 @@ export const savePeerReview = async (payload) => {
 };
 
 export const getSubmissionById = async (submissionId) => {
-  logStage('getSubmissionById:start', { submissionId });
   if (!isFirebaseConfigured) {
     return {
       id: submissionId,
@@ -864,7 +854,6 @@ export const getSubmissionById = async (submissionId) => {
 };
 
 export const getSubmissionForExercise = async (exerciseId) => {
-  logStage('getSubmissionForExercise:start', { exerciseId });
   if (!isFirebaseConfigured) {
     // Mock: assume no submission for demo
     return null;
@@ -875,7 +864,6 @@ export const getSubmissionForExercise = async (exerciseId) => {
 };
 
 export const generateExercisePlanIfEligible = async ({ student, mode, latestTutorReport, completedLesson, understandingLevel, availablePapers }) => {
-  logStage('generateExercisePlanIfEligible:start', { studentId: student?.uid, mode, paperCount: availablePapers?.length ?? 0 });
   const studentState = await getStudentAccessState(student);
   const papers = availablePapers ?? studentState.matchingQuestionPapers;
   const completedLessons = completedLesson
@@ -1047,7 +1035,6 @@ export const subscribeToUserProfile = (uid, callback) => {
 
 
 export const saveGuideQuizResult = async ({ userId, role, userName, answers, score, totalQuestions, percentage }) => {
-  logStage('saveGuideQuizResult:start', { userId, role, percentage });
   const payload = {
     userId,
     role,
@@ -1075,7 +1062,6 @@ export const saveGuideQuizResult = async ({ userId, role, userName, answers, sco
 };
 
 export const getLatestGuideQuizResult = async ({ userId, role }) => {
-  logStage('getLatestGuideQuizResult:start', { userId, role });
   if (!userId) return null;
 
   if (!isFirebaseConfigured) {
@@ -1097,8 +1083,6 @@ export const getLatestGuideQuizResult = async ({ userId, role }) => {
 };
 
 export const getGuideQuizResultsSummary = async () => {
-  logStage('getGuideQuizResultsSummary:start');
-
   if (!isFirebaseConfigured) {
     const users = demoUsers.filter((user) => user.role === 'student' || user.role === 'tutor');
     return {

@@ -13,7 +13,6 @@ import {
 import { mockUsers } from '../data/mockData';
 
 const AuthContext = createContext(null);
-const logStage = (stage, payload = {}) => console.log(`[Examify][AuthProvider] ${stage}`, payload);
 
 export const AuthProvider = ({ children }) => {
   const [state, setState] = useState({ user: null, profile: null, loading: true, error: null });
@@ -31,7 +30,6 @@ export const AuthProvider = ({ children }) => {
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      logStage('onAuthStateChanged', { uid: firebaseUser?.uid ?? null });
       if (!firebaseUser) {
         setState({ user: null, profile: null, loading: false, error: null });
         return;

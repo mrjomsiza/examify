@@ -1,13 +1,15 @@
 import { CalendarDays, Lock, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { SubmissionUpload } from './SubmissionUpload';
-import { uploadSubmissionImage } from '../../services/storageService';
+import { uploadSubmissionImage, getUreviewedExercises } from '../../services/storageService';
 import { canSubmitPeerReview } from '../../utils/exerciseRules';
 import { getQuestionPapersByIds } from '../../services/firestoreService';
 
-export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId, dashboard, submitted = false }) => {
+export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId, dashboard }) => {
   const [openingPapers, setOpeningPapers] = useState(false);
-
+  const [loadingPeerReviews, setLoadingPeerReviews] = useState(false);
+  const [unreviewedExercises, setUnreviewedExercises] = useState([]);
+  
   const handleOpenPapers = async () => {
     if (!exercise?.paperIds?.length) return;
     setOpeningPapers(true);
@@ -25,8 +27,20 @@ export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId,
     }
   };
 
+  const handleGetUnreviewedExercises = async () => {
+    setLoadingPeerReviews(true);
+    try {
+      const list = await getUreviewedExercises(studentId);
+      setUnreviewedExercises(list || []);
+    } catch (error) {
+      console.error("Failed to fetch peer review exercises:", error);
+    } finally {
+      setLoadingPeerReviews(false);
+    }
+  };
+
   return (
-    <div className="panel p-6">
+    <div className="panel p-6 w-full">
       <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
         <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 font-semibold text-brand-700">
           <CalendarDays className="h-4 w-4" />
@@ -53,14 +67,15 @@ export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId,
       )}
       <div className="mt-6 flex flex-wrap gap-3">
         {availability.state === 'active' ? (
-          submitted ? (
-            <div className="panel flex min-h-56 items-center justify-center p-6 text-center text-sm text-slate-500">
-              Work submitted for today. Wait for tutor feedback and tomorrow's exercise.
+          exercise.submittedImageUrl !== '' && exercise.submittedFileName !== '' ? (
+            <div className="panel flex items-center w-full mb-4 justify-center p-6 text-center text-sm text-slate-500">
+              Work submitted ✅.
             </div>
           ) : !paymentLocked && exercise ? (
             <SubmissionUpload
               exerciseId={exercise.id}
               onSubmit={({ file, exerciseId }) => uploadSubmissionImage({ file, exerciseId, studentId })}
+              exercise={exercise}
             />
           ) : (
             <div className="panel flex min-h-56 items-center justify-center p-6 text-center text-sm text-slate-500">
@@ -76,15 +91,26 @@ export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId,
       </div>
       <div className="panel space-y-4 p-6 w-full">
         <h3 className="text-xl font-semibold text-slate-950">Feedback loop</h3>
-        {(dashboard.feedback ?? []).map((item) => (
-          <div key={item.id} className="rounded-2xl bg-slate-50 p-4">
-            <p className="font-semibold text-slate-900">{item.title}</p>
-            <p className="mt-2 text-sm text-slate-600">{item.message}</p>
+        {unreviewedExercises.length > 0 && (
+          <div className="mt-4 space-y-3">
+            <h4 className="font-semibold">Available peer review targets</h4>
+            {unreviewedExercises.map((item) => (
+              <div key={item.id} className="rounded-xl border p-3">
+                <p className="text-sm font-medium">{item.exerciseTitle || item.title || "Note exercise"}</p>
+                <p className="text-xs text-slate-500">
+                  Submitted by {item.studentName || item.studentId}, {item.assignmentDate}
+                </p>
+                {item.submittedImageUrl ? (
+                  <a href={item.submittedImageUrl} target="_blank" rel="noreferrer" className="text-brand-600 underline">
+                    Open submitted image
+                  </a>
+                ) : (
+                  <span className="text-xs text-slate-400">No submission image URL</span>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-        <div className="rounded-2xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
-          Peer review unlocked: {String(canSubmitPeerReview(dashboard.peerReviewAssignment ?? {}))}
-        </div>
+        )}
       </div>
     </div>
   );
