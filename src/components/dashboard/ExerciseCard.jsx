@@ -1,14 +1,17 @@
 import { CalendarDays, Lock, FileText } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SubmissionUpload } from './SubmissionUpload';
-import { uploadSubmissionImage, getUreviewedExercises } from '../../services/storageService';
+import { uploadSubmissionImage, uploadPeerReviewImage } from '../../services/storageService';
 import { canSubmitPeerReview } from '../../utils/exerciseRules';
 import { getQuestionPapersByIds } from '../../services/firestoreService';
+import { collection, query, where, orderBy, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../firebase/config';
+import { MarkingCanvas as ImageEditor } from '../canvas/pictureEditorCanvas';
 
 export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId, dashboard }) => {
   const [openingPapers, setOpeningPapers] = useState(false);
-  const [loadingPeerReviews, setLoadingPeerReviews] = useState(false);
   const [unreviewedExercises, setUnreviewedExercises] = useState([]);
+  const [reviewingItem, setReviewingItem] = useState(null);
   
   const handleOpenPapers = async () => {
     if (!exercise?.paperIds?.length) return;
@@ -27,17 +30,62 @@ export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId,
     }
   };
 
-  const handleGetUnreviewedExercises = async () => {
-    setLoadingPeerReviews(true);
+  const handleSaveReview = async (file) => {
+    if (!reviewingItem) return;
+
     try {
-      const list = await getUreviewedExercises(studentId);
-      setUnreviewedExercises(list || []);
+      // Rename the file
+      const originalName = reviewingItem.submittedFileName || 'submission.png';
+      const reviewFileName = originalName.replace(/\.[^/.]+$/, '-review.png');
+      const renamedFile = new File([file], reviewFileName, { type: file.type });
+
+      // Upload reviewed image
+      const upload = await uploadPeerReviewImage({ file: renamedFile, studentId: reviewingItem.studentId, exerciseId: reviewingItem.id });
+
+      // Update the reviewed exercise document
+      const exerciseRef = doc(db, "dailyExerciseAssignments", reviewingItem.id);
+      await updateDoc(exerciseRef, {
+        submittedReviewImageUrl: upload.url,
+        submittedReviewFileName: upload.fileName,
+        peerReviewed: "Yes",
+        peerReviewStatus: "completed",
+        peerReviewDate: serverTimestamp(),
+      });
+
+      setReviewingItem(null); // Close editor
     } catch (error) {
-      console.error("Failed to fetch peer review exercises:", error);
-    } finally {
-      setLoadingPeerReviews(false);
+      console.error('Failed to save review:', error);
     }
   };
+
+  useEffect(() => {
+    if (!exercise.submittedImageUrl) {
+      setUnreviewedExercises([]);
+      return;
+    }
+
+    const now = new Date();
+    const todayLocal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    const q = query(
+      collection(db, "dailyExerciseAssignments"),
+      where("assignmentDate", "==", todayLocal),
+      where("submittedImageUrl", "!=", ""),
+      orderBy("assignmentDate", "asc"),
+    );
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const list = querySnapshot.docs
+        .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+        .filter((item) =>
+          item.studentId !== studentId &&
+          item.peerReviewStatus === "pending"
+        );
+      setUnreviewedExercises(list);
+    });
+
+    return unsubscribe;
+  }, [exercise.submittedImageUrl, studentId]);
 
   return (
     <div className="panel p-6 w-full">
@@ -91,6 +139,15 @@ export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId,
       </div>
       <div className="panel space-y-4 p-6 w-full">
         <h3 className="text-xl font-semibold text-slate-950">Feedback loop</h3>
+        {(dashboard.feedback ?? []).map((item) => (
+          <div key={item.id} className="rounded-2xl bg-slate-50 p-4">
+            <p className="font-semibold text-slate-900">{item.title}</p>
+            <p className="mt-2 text-sm text-slate-600">{item.message}</p>
+          </div>
+        ))}
+        <div className="rounded-2xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+          Peer review unlocked: {String(canSubmitPeerReview(dashboard.peerReviewAssignment ?? {}))}
+        </div>
         {unreviewedExercises.length > 0 && (
           <div className="mt-4 space-y-3">
             <h4 className="font-semibold">Available peer review targets</h4>
@@ -100,15 +157,29 @@ export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId,
                 <p className="text-xs text-slate-500">
                   Submitted by {item.studentName || item.studentId}, {item.assignmentDate}
                 </p>
-                {item.submittedImageUrl ? (
-                  <a href={item.submittedImageUrl} target="_blank" rel="noreferrer" className="text-brand-600 underline">
-                    Open submitted image
-                  </a>
-                ) : (
-                  <span className="text-xs text-slate-400">No submission image URL</span>
-                )}
+                <button 
+                  onClick={() => setReviewingItem(item)} 
+                  className="btn-secondary text-sm"
+                >
+                  Review this submission
+                </button>
               </div>
             ))}
+          </div>
+        )}
+        {reviewingItem && (
+          <div className="mt-4">
+            <h4 className="font-semibold mb-2">Reviewing: {reviewingItem.exerciseTitle || "Exercise"}</h4>
+            <ImageEditor 
+              imageUrl={reviewingItem.submittedImageUrl} 
+              onSave={handleSaveReview} 
+            />
+            <button 
+              onClick={() => setReviewingItem(null)} 
+              className="btn-secondary mt-2"
+            >
+              Cancel Review
+            </button>
           </div>
         )}
       </div>

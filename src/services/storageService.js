@@ -47,6 +47,26 @@ export const uploadSubmissionImage = async ({ file, studentId, exerciseId }) => 
   }
 };
 
+export const uploadPeerReviewImage = async ({ file, studentId, exerciseId }) => {
+  if (!isFirebaseConfigured) {
+    return {
+      fileName: file?.name ?? 'demo-review.png',
+      url: URL.createObjectURL(file),
+    };
+  }
+
+  try {
+    const upload = await uploadFile({ file, path: `submissions/${studentId}/${exerciseId}` });
+    return { 
+      fileName: upload.fileName, 
+      url: upload.url 
+    };
+  } catch (error) {
+    console.error("Review upload failed:", error);
+    throw error;
+  }
+};
+
 export const getUreviewedExercises = async (studentId) => {
   if (!isFirebaseConfigured) return [];
 
