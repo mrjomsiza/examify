@@ -549,6 +549,13 @@ const buildAssignmentsFromAiRecommendations = ({
       }).filter(Boolean).join('\n'),
       questionReferences,
       topicBreakdown,
+      submittedImageUrl: "",
+      submittedFileName: "",
+      peerReviewed: "No",
+      peerReviewStatus: "pending",
+      peerReviewDate: null,
+      submittedReviewImageUrl: "",
+      submittedReviewFileName: "",
     };
   });
 

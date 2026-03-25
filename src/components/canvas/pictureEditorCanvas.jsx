@@ -1,59 +1,45 @@
-import { Tldraw, createShapeId } from 'tldraw'
-import 'tldraw/tldraw.css'
-import { useRef } from 'react'
+import { useRef } from 'react';
+import { ReactSketchCanvas } from 'react-sketch-canvas';
 
 export const MarkingCanvas = ({ imageUrl, onSave }) => {
-  const editorRef = useRef(null)
+  const canvasRef = useRef(null);
   
   // This function triggers when the student is done marking
   const handleExport = async () => {
-    if (!editorRef.current) return
-    // 1. Get the image as a blob
-    const { blob } = await editorRef.current.exportToBlob({
-      format: 'png',
-      quality: 1,
-      scale: 2, // Higher quality for grading
-    })
-    
-    // 2. Pass it back to your save function
-    const file = new File([blob], "graded-work.png", { type: "image/png" });
-    onSave(file);
+    if (!canvasRef.current) return;
+    try {
+      const dataUrl = await canvasRef.current.exportImage("png");
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], "graded-work.png", { type: "image/png" });
+      onSave(file);
+    } catch (error) {
+      console.error("Failed to export image", error);
+    }
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0 }}>
-      <Tldraw 
-        autoFocus
-        onMount={(editor) => {
-          editorRef.current = editor
-          // 1. Load the student's work as the background
-          editor.createShapes([
-            {
-              id: createShapeId(),
-              type: 'image',
-              x: 0,
-              y: 0,
-              props: {
-                w: 800, // Adjust based on your UI
-                h: 1000,
-                assetId: null,
-                src: imageUrl,
-              },
-              isLocked: true, // Lock it so they don't move the original work
-            },
-          ]);
-        }}
-      >
-        {/* Custom Save Button overlaid on the canvas */}
-        <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 1000 }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 50, backgroundColor: 'rgba(0,0,0,0.8)', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ position: 'relative', width: '100%', maxWidth: '800px', height: '80vh', backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden' }}>
+        <ReactSketchCanvas
+          ref={canvasRef}
+          width="100%"
+          height="100%"
+          strokeWidth={4}
+          strokeColor="red"
+          backgroundImage={imageUrl}
+          preserveBackgroundImageAspectRatio="contain"
+          exportWithBackgroundImage={true}
+        />
+        <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 1000 }}>
           <button 
-            className="btn btn-primary"
+            className="btn-primary rounded-lg px-6 py-2 font-bold shadow-lg"
             onClick={handleExport} 
           >
             Submit Grade
           </button>
         </div>
-      </Tldraw>
+      </div>
     </div>
-  )
-}
+  );
+};
