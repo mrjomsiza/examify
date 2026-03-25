@@ -1,4 +1,11 @@
-import { ArrowRight, BookOpen, BrainCircuit, CheckCircle2, ShieldCheck, Users } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpen,
+  BrainCircuit,
+  CheckCircle2,
+  ShieldCheck,
+  Users,
+} from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 import { LandingSection } from '../components/landing/LandingSection';
 import { SESSION_PRICING } from '../lib/constants';
@@ -7,22 +14,26 @@ import { useAuth } from '../hooks/useAuth';
 const features = [
   {
     title: 'Daily Maths exercises that unlock progressively',
-    description: 'Examify assigns up to three exercises per day, but only from tutor-confirmed completed topics. Missed work is locked to preserve the daily rhythm.',
+    description:
+      'Examify assigns up to three exercises per day, but only from tutor-confirmed completed topics.',
     icon: BookOpen,
   },
   {
     title: 'Peer marking after submission',
-    description: 'Students review another learner’s uploaded answer image, score it, and leave comments once their own submission is complete.',
+    description:
+      'Students review another learner’s uploaded answer image.',
     icon: Users,
   },
   {
     title: 'Tutor-led topic tracking and reports',
-    description: 'Tutors control covered topics, write free-text reports, and guide learning with visibility over every student’s progress.',
+    description:
+      'Tutors guide learning with visibility over every student’s progress.',
     icon: ShieldCheck,
   },
   {
     title: 'AI recommendations grounded in real data',
-    description: 'Gemini-backed recommendations consider grade, region, covered topics, question papers, tutor notes, and past marks before suggesting exercises.',
+    description:
+      'Smart recommendations based on real student performance.',
     icon: BrainCircuit,
   },
 ];
@@ -38,87 +49,112 @@ export const LandingPage = () => {
   if (profile?.role) return <Navigate to={`/${profile.role}`} replace />;
 
   return (
-    <>
+    <div className="bg-slate-950 text-white">
       {/* ================= HERO ================= */}
-      <section className="mx-auto max-w-7xl px-4 pb-24 pt-20 lg:px-6 lg:pt-24">
-        <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="relative mx-auto max-w-7xl px-4 pb-20 pt-20 lg:px-6 lg:pt-24">
+        
+        {/* BACKGROUND GLOW */}
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.25),transparent_40%),radial-gradient(circle_at_80%_30%,rgba(168,85,247,0.2),transparent_40%)]" />
+
+        <div className="grid items-start gap-10 lg:grid-cols-[1.1fr_0.9fr]">
           
           {/* LEFT */}
-          <div className="panel-dark p-8 md:p-10 backdrop-blur-xl border-white/20 shadow-[0_20px_50px_-5px_rgba(0,0,0,0.5)]">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur-xl shadow-[0_25px_70px_rgba(0,0,0,0.7)]">
+            
             <div className="inline-flex items-center gap-2 rounded-full border border-brand-400/30 bg-brand-500/10 px-4 py-2 text-sm font-semibold text-brand-200">
-              70-20-10 Maths learning for South African students
+              70-20-10 Maths learning
             </div>
 
-            <h1 className="mt-6 text-5xl font-bold tracking-tight text-white md:text-6xl drop-shadow-lg">
-              Structured daily Maths practice, guided by tutors and powered by AI.
+            <h1 className="mt-6 text-5xl font-bold tracking-tight text-white md:text-6xl leading-tight">
+              Structured daily Maths practice,
+              <span className="block bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                guided by tutors & AI
+              </span>
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 drop-shadow">
-              Examify helps students stay on track with tutor-approved daily exercises, peer marking, paper-based answer uploads, and subscription billing designed around the support they actually need.
+            <p className="mt-6 text-lg text-slate-300">
+              Examify helps students stay consistent with structured exercises,
+              peer review, and tutor-led progress tracking.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link to="/signup" className="btn-primary gap-2">
+            <div className="mt-10 flex flex-wrap gap-4">
+              <Link
+                to="/signup"
+                className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105"
+              >
                 Create account
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-
-              <Link to="/login" className="btn-secondary border-white/20 text-white hover:border-brand-400 hover:text-white">
-                Explore demo accounts
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
               </Link>
             </div>
 
-            <div className="mt-8 grid gap-3 text-sm text-slate-300 md:grid-cols-2">
+            <div className="mt-10 grid gap-4 md:grid-cols-2">
               {benefits.map((benefit) => (
-                <div key={benefit} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 text-accent" />
-                  <span>{benefit}</span>
+                <div
+                  key={benefit}
+                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition"
+                >
+                  <CheckCircle2 className="h-5 w-5 text-green-400" />
+                  <span className="text-slate-200">{benefit}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* RIGHT (3D CARDS) */}
-          <div className="relative flex flex-col items-start justify-center pt-8 pb-32 lg:pb-0 lg:pl-10 min-h-[500px]">
-            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.3em] text-brand-200">
-              Teaching Method
-            </p>
-
-            <div className="absolute inset-0 rounded-full mt-1 bg-brand-500/20 blur-[100px]" />
+          {/* RIGHT (FIXED POSITION - NO GAP) */}
+          <div className="relative flex items-start justify-center min-h-[420px] -mt-0 lg:mt-10">
+            
+            <div className="absolute w-[400px] h-[400px] bg-indigo-500/20 blur-[120px] rounded-full" />
 
             <div className="relative w-full max-w-sm">
-              <div className="absolute top-0 w-full rounded-3xl border border-white/30 bg-white/10 p-6 backdrop-blur-xl">
-                <p className="text-5xl font-extrabold text-white">70%</p>
-                <p className="mt-2 text-xl font-bold text-white">Daily exercise</p>
+
+              {/* 70 */}
+              <div className="absolute top-0 w-full rounded-3xl border border-white/20 bg-white/10 p-8 backdrop-blur-xl shadow-[0_25px_60px_rgba(0,0,0,0.6)] transform rotate-[-6deg] hover:rotate-0 hover:scale-105 transition duration-500">
+                <p className="text-6xl font-extrabold text-white">70%</p>
+                <p className="mt-2 text-xl font-bold text-white">
+                  Daily exercise
+                </p>
               </div>
 
-              <div className="absolute top-[140px] right-0 w-11/12 rounded-3xl border border-brand-400/40 bg-brand-900/60 p-6">
-                <p className="text-4xl font-bold text-white">20%</p>
-                <p className="mt-2 text-lg font-bold text-white">Peer marking</p>
+              {/* 20 */}
+              <div className="absolute top-[130px] right-0 w-11/12 rounded-3xl border border-purple-400/30 bg-purple-900/70 p-8 shadow-xl transform rotate-[6deg] hover:rotate-0 hover:scale-105 transition duration-500">
+                <p className="text-5xl font-bold text-white">20%</p>
+                <p className="mt-2 text-lg font-bold text-white">
+                  Peer marking
+                </p>
               </div>
 
-              <div className="absolute top-[280px] left-0 w-10/12 rounded-3xl border border-slate-700/50 bg-slate-950/70 p-6">
-                <p className="text-4xl font-bold text-white">10%</p>
-                <p className="mt-2 text-lg font-bold text-white">Tutor guidance</p>
+              {/* 10 */}
+              <div className="absolute top-[250px] left-0 w-10/12 rounded-3xl border border-slate-700/40 bg-slate-900/80 p-8 shadow-xl transform rotate-[-4deg] hover:rotate-0 hover:scale-105 transition duration-500">
+                <p className="text-5xl font-bold text-white">10%</p>
+                <p className="mt-2 text-lg font-bold text-white">
+                  Tutor guidance
+                </p>
               </div>
+
             </div>
           </div>
-
         </div>
       </section>
 
       {/* ================= FEATURES ================= */}
       <LandingSection
         eyebrow="Platform"
-        title="Built for the real Examify workflow"
-        description="The first version goes beyond static screens by wiring the core app flows, backend function structure, and data boundaries needed for production deployment."
+        title="Built for real learning"
+        description="Designed for real student workflows."
       >
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
           {features.map(({ title, description, icon: Icon }) => (
-            <div key={title} className="panel p-6 hover:-translate-y-2 transition">
-              <Icon className="h-6 w-6 text-brand-700" />
-              <h3 className="mt-4 text-xl font-semibold text-slate-950">{title}</h3>
-              <p className="mt-3 text-sm text-slate-600">{description}</p>
+            <div
+              key={title}
+              className="group rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition hover:-translate-y-3 hover:shadow-2xl"
+            >
+              <Icon className="h-7 w-7 text-indigo-400" />
+              <h3 className="mt-4 text-lg font-semibold text-white">
+                {title}
+              </h3>
+              <p className="mt-2 text-sm text-slate-300">
+                {description}
+              </p>
             </div>
           ))}
         </div>
@@ -127,63 +163,76 @@ export const LandingPage = () => {
       {/* ================= PRICING ================= */}
       <LandingSection
         eyebrow="Pricing"
-        title="Payment guidelines."
-        description="Students pay monthly via online payments."
+        title="Simple pricing"
+        description="Clear and flexible pricing."
       >
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="panel p-6">
-            <p className="font-semibold text-slate-950">Session pricing</p>
-            <p className="text-slate-600 mt-2">Online: R{SESSION_PRICING.online}</p>
-            <p className="text-slate-600">In-person: R{SESSION_PRICING.inPerson}</p>
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl shadow-xl">
+            <p className="font-semibold text-white text-lg">
+              Session pricing
+            </p>
+            <p className="mt-3 text-slate-300">
+              Online: R{SESSION_PRICING.online}
+            </p>
+            <p className="text-slate-300">
+              In-person: R{SESSION_PRICING.inPerson}
+            </p>
           </div>
 
-          <div className="panel p-6">
-            <p className="font-semibold text-slate-950">Recommended sessions</p>
-            <p className="text-slate-600 mt-2"> Below 70% → 4 sessions</p>
-            <p className="text-slate-600"> 70% and above → 2 sessions</p>
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl shadow-xl">
+            <p className="font-semibold text-white text-lg">
+              Recommended sessions
+            </p>
+            <p className="mt-3 text-slate-300">
+              Below 70% → 4 sessions
+            </p>
+            <p className="text-slate-300">
+              70% and above → 2 sessions
+            </p>
           </div>
         </div>
       </LandingSection>
 
-      {/* ================= FOOTER ================= */}
-      <footer className="mt-24 border-t border-white/10 bg-slate-950/80 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-4 py-12 lg:px-6 grid gap-10 md:grid-cols-3">
+      {/* ================= PREMIUM FOOTER ================= */}
+      <footer className="relative mt-28 border-t border-white/10 bg-slate-950">
+        
+        {/* glow */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.2),transparent_60%)]" />
 
-          {/* LOGO + DESC */}
+        <div className="relative mx-auto max-w-7xl px-4 py-16 lg:px-6 grid gap-12 md:grid-cols-3">
+          
           <div>
-            <h2 className="text-2xl font-bold text-white">Examify</h2>
-            <p className="mt-3 text-sm text-slate-400">
-              Structured learning powered by tutors and AI. Helping students become exam ready.
+            <h2 className="text-2xl font-bold text-white tracking-wide">
+              Examify
+            </h2>
+            <p className="mt-4 text-sm text-slate-400 leading-relaxed">
+              Structured learning powered by tutors and AI. Helping students
+              become exam ready through consistency and guidance.
             </p>
           </div>
 
-          {/* LINKS */}
           <div>
             <p className="font-semibold text-white">Policies</p>
-            <ul className="mt-3 space-y-2 text-sm text-slate-400">
-              <li><Link to="/policies#terms" className="hover:text-white">Terms of Service</Link></li>
-              <li><Link to="/policies#privacy" className="hover:text-white">Privacy Policy</Link></li>
-              <li><Link to="/policies#refunds" className="hover:text-white">Refund Policy</Link></li>
+            <ul className="mt-4 space-y-3 text-sm text-slate-400">
+              <li><Link to="/policies#terms" className="hover:text-white transition">Terms</Link></li>
+              <li><Link to="/policies#privacy" className="hover:text-white transition">Privacy</Link></li>
+              <li><Link to="/policies#refunds" className="hover:text-white transition">Refunds</Link></li>
             </ul>
           </div>
 
-          {/* CONTACT */}
           <div>
             <p className="font-semibold text-white">Contact</p>
-            <ul className="mt-3 space-y-2 text-sm text-slate-400">
+            <ul className="mt-4 space-y-3 text-sm text-slate-400">
               <li>Email: bakayise.developers@gmail.com</li>
-              <li>Examify</li>
               <li>South Africa</li>
             </ul>
           </div>
-
         </div>
 
-        {/* BOTTOM BAR */}
-        <div className="border-t border-white/10 py-4 text-center text-xs text-slate-500">
+        <div className="border-t border-white/10 py-6 text-center text-xs text-slate-500">
           © {new Date().getFullYear()} Examify. All rights reserved.
         </div>
       </footer>
-    </>
+    </div>
   );
 };
