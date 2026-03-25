@@ -250,7 +250,7 @@ export const ParentDashboardPage = () => {
       
       <div className="panel p-6 mb-8 flex flex-col md:flex-row gap-4 items-end">
         <div className="flex-1 w-full">
-          <label className="label block mb-2">Student Email or ID</label>
+          <label className="label block mb-2">Student Email</label>
           <input 
             type="text" 
             className="input w-full" 

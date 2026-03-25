@@ -8,8 +8,8 @@ import {
 } from './config.js';
 
 const sessionPricing = {
-  online: 250,
-  inPerson: 300,
+  online: 220,
+  inPerson: 250,
 };
 
 const getRecommendedSessionCount = (latestMark = 0) => {
