@@ -239,7 +239,7 @@ export const StudentDashboardPage = () => {
 
       <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
         <div className="space-y-6">
-          <SectionHeader showLogo eyebrow="Exercises" title={viewMode === 'current' ? 'Current Week' : viewMode === 'past' ? 'Past Exercises' : 'Future Exercises'} description={viewMode === 'current' ? 'Today and the next 6 days of assigned exercises.' : viewMode === 'past' ? 'Previously completed exercises for reference.' : 'Exercises scheduled beyond the current week.'} />
+          <SectionHeader eyebrow="Exercises" title={viewMode === 'current' ? 'Current Week' : viewMode === 'past' ? 'Past Exercises' : 'Future Exercises'} description={viewMode === 'current' ? 'Today and the next 6 days of assigned exercises.' : viewMode === 'past' ? 'Previously completed exercises for reference.' : 'Exercises scheduled beyond the current week.'} />
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => setViewMode('current')}

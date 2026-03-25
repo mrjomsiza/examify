@@ -22,7 +22,7 @@ export const AdminDashboardPage = () => {
       </section>
       <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
         <div>
-          <SectionHeader showLogo eyebrow="Payments" title="Latest payment activity" description="Payments and subscription records appear here after secure Paystack verification." />
+          <SectionHeader eyebrow="Payments" title="Latest payment activity" description="Payments and subscription records appear here after secure Paystack verification." />
           <div className="mt-4 space-y-4">
             {(dashboard.payments ?? []).map((payment) => (
               <div key={payment.id} className="panel p-5">
