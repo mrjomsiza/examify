@@ -1147,3 +1147,46 @@ export const getGuideQuizResultsSummary = async () => {
     tutors: users.filter((user) => user.role === 'tutor').map(buildRow),
   };
 };
+
+export const assignStudentToParent = async ({ parentId, studentIdentifier }) => {
+  if (!isFirebaseConfigured) {
+    return { success: true, studentId: 'demo-student', parentId };
+  }
+  ensureDb();
+  
+  let q;
+  if (studentIdentifier.includes('@')) {
+    q = query(collection(db, collections.users), where('email', '==', studentIdentifier), where('role', '==', 'student'), limit(1));
+  } else {
+    q = query(collection(db, collections.users), where('uid', '==', studentIdentifier), where('role', '==', 'student'), limit(1));
+  }
+  
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) {
+    throw new Error('Student not found. Please check the email or student ID.');
+  }
+  
+  const studentDoc = snapshot.docs[0];
+  const student = studentDoc.data();
+  
+  if (student.parentId && student.parentId !== parentId) {
+    throw new Error('This student is already assigned to another parent.');
+  }
+  
+  await updateDoc(doc(db, collections.users, student.uid), {
+    parentId,
+    updatedAt: serverTimestamp(),
+  });
+  
+  return { success: true, studentId: student.uid, parentId, studentName: student.displayName || student.email };
+};
+
+export const getStudentsForParent = async (parentId) => {
+  if (!isFirebaseConfigured) {
+    return []; // Empty for demo initially unless pushed to a mock array
+  }
+  ensureDb();
+  const q = query(collection(db, collections.users), where('parentId', '==', parentId), where('role', '==', 'student'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(docSnap => docSnap.data());
+};

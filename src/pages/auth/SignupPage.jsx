@@ -138,6 +138,7 @@ export const SignupPage = () => {
             <span className="label">Role</span>
             <select className="input" value={form.role} onChange={handleChange('role')}>
               <option value={ROLES.STUDENT}>Student</option>
+              <option value={ROLES.PARENT}>Parent</option>
               <option value={ROLES.TUTOR}>Tutor</option>
               <option value={ROLES.ADMIN}>Admin</option>
             </select>

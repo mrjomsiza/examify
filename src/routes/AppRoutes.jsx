@@ -20,6 +20,7 @@ import { PastExamPapersPage } from '../pages/PastExamPapersPage';
 import { GuidePage } from '../pages/GuidePage';
 import { ROLES } from '../lib/constants';
 import { PoliciesPage } from '../pages/PoliciesPage';
+import { ParentDashboardPage } from '../pages/parent/ParentDashboardPage';
 
 export const AppRoutes = () => (
   <Routes>
@@ -38,6 +39,11 @@ export const AppRoutes = () => (
       <Route path="/student/profile" element={<StudentProfilePage />} />
       <Route path="/student/papers" element={<PastExamPapersPage />} />
       <Route path="/student/guide" element={<GuidePage role="student" />} />
+      <Route path="/policies" element={<PoliciesPage />} />
+    </Route>
+
+    <Route element={<ProtectedRoute allowedRoles={[ROLES.PARENT]} />}>
+      <Route path="/parent" element={<ParentDashboardPage />} />
       <Route path="/policies" element={<PoliciesPage />} />
     </Route>
 
