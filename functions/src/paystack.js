@@ -61,10 +61,10 @@ const callableOptions = {
 
 export const initializePaystackTransaction = onCall(callableOptions, async (request) => {
   try {
-    const { email, studentId, latestMark, sessionType } = request.data ?? {};
+    const { email, studentId, latestMark, sessionType, studentIds } = request.data ?? {};
 
-    if (!email || !studentId) {
-      throw new HttpsError('invalid-argument', 'email and studentId are required.');
+    if (!email || (!studentId && (!studentIds || studentIds.length === 0))) {
+      throw new HttpsError('invalid-argument', 'email and either studentId or studentIds are required.');
     }
 
     const { paystackCallbackUrl } = getPaystackConfig();
@@ -74,17 +74,30 @@ export const initializePaystackTransaction = onCall(callableOptions, async (requ
     }
 
     const db = getDb();
-    const quote = calculateSubscriptionQuote({ latestMark, sessionType });
-    const reference = `examify-${studentId}-${Date.now()}`;
+    let totalAmount = 0;
+    
+    // For single student
+    let quote = null;
+    if (studentId) {
+      quote = calculateSubscriptionQuote({ latestMark, sessionType });
+      totalAmount = quote.amount;
+    } 
+    // For bulk students
+    else if (studentIds && studentIds.length > 0) {
+      for (const s of studentIds) {
+        totalAmount += calculateSubscriptionQuote({ latestMark: s.latestMark, sessionType: s.sessionType }).amount;
+      }
+    }
+
+    const reference = `examify-${studentId || 'bulk'}-${Date.now()}`;
 
     logger.info('Initializing Paystack transaction', {
       email,
       studentId,
+      studentIds,
       reference,
       callbackUrl: paystackCallbackUrl,
-      amount: quote.amount,
-      sessionType: quote.sessionType,
-      sessionCount: quote.sessionCount,
+      amount: totalAmount,
     });
 
     const transaction = await paystackRequest({
@@ -92,15 +105,13 @@ export const initializePaystackTransaction = onCall(callableOptions, async (requ
       method: 'POST',
       payload: {
         email,
-        amount: Math.round(quote.amount * 100),
+        amount: Math.round(totalAmount * 100),
         currency: 'ZAR',
         reference,
         callback_url: paystackCallbackUrl,
         metadata: {
-          studentId,
-          sessionType: quote.sessionType,
-          sessionCount: quote.sessionCount,
-          latestMark: quote.latestMark,
+          studentId: studentId || null,
+          studentIds: studentIds ? JSON.stringify(studentIds.map(s => s.id)) : null,
           subject: 'Mathematics',
         },
       },
@@ -108,12 +119,10 @@ export const initializePaystackTransaction = onCall(callableOptions, async (requ
 
     await db.collection('payments').doc(reference).set({
       reference,
-      studentId,
+      studentId: studentId || null,
       email,
-      amount: quote.amount,
+      amount: totalAmount,
       currency: 'ZAR',
-      sessionType: quote.sessionType,
-      sessionCount: quote.sessionCount,
       status: 'initialized',
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
@@ -122,7 +131,7 @@ export const initializePaystackTransaction = onCall(callableOptions, async (requ
       authorizationUrl: transaction.authorization_url,
       accessCode: transaction.access_code,
       reference,
-      quote,
+      quote: quote || { amount: totalAmount },
     };
   } catch (error) {
     logger.error('initializePaystackTransaction failed', error);
@@ -169,63 +178,67 @@ export const verifyPaystackTransaction = onCall(callableOptions, async (request)
     { merge: true }
   );
 
-  if (authorization?.authorization_code && metadata.studentId) {
-    await db.collection('subscriptionAuthorizations').doc(metadata.studentId).set(
-      {
-        studentId: metadata.studentId,
-        email: transaction.customer?.email ?? null,
-        authorizationCode: authorization.authorization_code,
-        bin: authorization.bin,
-        last4: authorization.last4,
-        expMonth: authorization.exp_month,
-        expYear: authorization.exp_year,
-        cardType: authorization.card_type,
-        bank: authorization.bank,
-        reusable: authorization.reusable,
-        signature: authorization.signature,
-        storedAt: admin.firestore.FieldValue.serverTimestamp(),
-        reference,
-      },
-      { merge: true }
+  let targetStudents = [];
+  if (metadata.studentId) targetStudents.push(metadata.studentId);
+  if (metadata.studentIds) {
+    try {
+      const parsedIds = JSON.parse(metadata.studentIds);
+      if (Array.isArray(parsedIds)) {
+        targetStudents = [...new Set([...targetStudents, ...parsedIds])];
+      }
+    } catch(e) {}
+  }
+
+  if (authorization?.authorization_code && targetStudents.length > 0) {
+    const nextRenewalDate = admin.firestore.Timestamp.fromDate(
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     );
 
-    await db.collection('subscriptions').doc(metadata.studentId).set(
-      {
-        studentId: metadata.studentId,
-        status: transaction.status === 'success' ? 'active' : 'pending',
-        amount: transaction.amount / 100,
-        currency: transaction.currency,
-        latestReference: reference,
-        sessionType: metadata.sessionType ?? 'online',
-        sessionCount: metadata.sessionCount ?? 1,
-        renewedAt: admin.firestore.FieldValue.serverTimestamp(),
-        renewalDate:
-          transaction.status === 'success'
-            ? admin.firestore.Timestamp.fromDate(
-                new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-              )
-            : null,
-        billingCycleDays: 30,
-        autoRenew: true,
-      },
-      { merge: true }
-    );
+    for (const sId of targetStudents) {
+      await db.collection('subscriptionAuthorizations').doc(sId).set(
+        {
+          studentId: sId,
+          email: transaction.customer?.email ?? null,
+          authorizationCode: authorization.authorization_code,
+          bin: authorization.bin,
+          last4: authorization.last4,
+          expMonth: authorization.exp_month,
+          expYear: authorization.exp_year,
+          cardType: authorization.card_type,
+          bank: authorization.bank,
+          reusable: authorization.reusable,
+          signature: authorization.signature,
+          storedAt: admin.firestore.FieldValue.serverTimestamp(),
+          reference,
+        },
+        { merge: true }
+      );
 
-    await db.collection('users').doc(metadata.studentId).set(
-      {
-        paymentCompleted: transaction.status === 'success',
-        subscriptionStatus: transaction.status === 'success' ? 'active' : 'pending',
-        latestPaymentReference: reference,
-        subscriptionRenewalDate:
-          transaction.status === 'success'
-            ? admin.firestore.Timestamp.fromDate(
-                new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-              )
-            : null,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    );
+      await db.collection('subscriptions').doc(sId).set(
+        {
+          studentId: sId,
+          status: transaction.status === 'success' ? 'active' : 'pending',
+          currency: transaction.currency,
+          latestReference: reference,
+          renewedAt: admin.firestore.FieldValue.serverTimestamp(),
+          renewalDate: transaction.status === 'success' ? nextRenewalDate : null,
+          billingCycleDays: 30,
+          autoRenew: true,
+        },
+        { merge: true }
+      );
+
+      await db.collection('users').doc(sId).set(
+        {
+          paymentCompleted: transaction.status === 'success',
+          subscriptionStatus: transaction.status === 'success' ? 'active' : 'pending',
+          latestPaymentReference: reference,
+          subscriptionRenewalDate: transaction.status === 'success' ? nextRenewalDate : null,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+    }
   }
 
   return {

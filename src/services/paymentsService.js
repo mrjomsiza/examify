@@ -6,10 +6,23 @@ export const getSubscriptionQuote = calculateSubscriptionQuote;
 
 export const initializeSubscriptionPayment = async (payload) => {
   if (!isFirebaseConfigured) {
+    let quote = null;
+    let totalAmount = 0;
+    
+    if (payload.studentId) {
+      quote = calculateSubscriptionQuote(payload);
+      totalAmount = quote.amount;
+    } else if (payload.studentIds && payload.studentIds.length > 0) {
+      for (const s of payload.studentIds) {
+        totalAmount += calculateSubscriptionQuote({ latestMark: s.latestMark, sessionType: s.sessionType }).amount;
+      }
+      quote = { amount: totalAmount };
+    }
+
     return {
       authorizationUrl: 'https://paystack.com/pay/demo-examify-session-plan',
-      reference: `demo-${Date.now()}`,
-      quote: calculateSubscriptionQuote(payload),
+      reference: `demo-${payload.studentId || 'bulk'}-${Date.now()}`,
+      quote,
     };
   }
 

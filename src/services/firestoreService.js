@@ -1190,3 +1190,35 @@ export const getStudentsForParent = async (parentId) => {
   const snapshot = await getDocs(q);
   return snapshot.docs.map(docSnap => docSnap.data());
 };
+
+export const updateStudentProfileByParent = async ({ parentId, studentId, updates }) => {
+  if (!isFirebaseConfigured) {
+    return { success: true, studentId, ...updates };
+  }
+  ensureDb();
+
+  const studentRef = doc(db, collections.users, studentId);
+  const snapshot = await getDoc(studentRef);
+  
+  if (!snapshot.exists()) {
+    throw new Error('Student not found');
+  }
+
+  const studentData = snapshot.data();
+  if (studentData.parentId !== parentId) {
+    throw new Error('Unauthorized: You are not assigned to this student.');
+  }
+
+  const payload = {
+    ...updates,
+    updatedAt: serverTimestamp()
+  };
+
+  // Convert previousYearMark back to number if provided
+  if (payload.previousYearMark !== undefined) {
+    payload.previousYearMark = Number(payload.previousYearMark);
+  }
+
+  await updateDoc(studentRef, payload);
+  return { success: true, studentId, ...payload };
+};
