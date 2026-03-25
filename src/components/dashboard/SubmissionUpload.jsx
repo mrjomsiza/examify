@@ -29,13 +29,13 @@ export const SubmissionUpload = ({ exerciseId, onSubmit, exercise }) => {
   return (
     <form onSubmit={handleSubmit} className="panel space-y-4 p-5 w-full">
       <div>
-        <h3 className="text-lg font-semibold text-slate-950">Upload Handwritten Work {exercise.id}</h3>
+        <h3 className="text-lg font-semibold text-slate-950">Upload Handwritten Work</h3>
         <p className="mt-2 text-sm text-slate-500">Submit a clear photo of your paper. JPG, PNG, or HEIC files are supported for answer uploads.</p>
       </div>
       <input type="file" accept="image/*" className="input" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       <button type="submit" disabled={loading} className="btn-primary gap-2 disabled:opacity-70">
         <UploadCloud className="h-4 w-4" />
-        {loading ? 'Uploading…' : `Submit image for Exercise ${exercise.submitted}`}
+        {loading ? 'Uploading…' : `Submit image`}
       </button>
       {message ? <p className="text-sm text-red">{message}</p> : null}
     </form>

@@ -138,30 +138,32 @@ export const ExerciseCard = ({ exercise, availability, paymentLocked, studentId,
         )}
       </div>
       <div className="panel space-y-4 p-6 w-full">
-        <h3 className="text-xl font-semibold text-slate-950">Feedback loop</h3>
-        {(dashboard.feedback ?? []).map((item) => (
-          <div key={item.id} className="rounded-2xl bg-slate-50 p-4">
-            <p className="font-semibold text-slate-900">{item.title}</p>
-            <p className="mt-2 text-sm text-slate-600">{item.message}</p>
-          </div>
-        ))}
-        <div className="rounded-2xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
-          Peer review unlocked: {String(canSubmitPeerReview(dashboard.peerReviewAssignment ?? {}))}
-        </div>
+        <h3 className="text-xl font-semibold text-slate-950">Mark for Others</h3>
         {unreviewedExercises.length > 0 && (
           <div className="mt-4 space-y-3">
-            <h4 className="font-semibold">Available peer review targets</h4>
+            <h4 className="font-semibold">Choose one To Review</h4>
             {unreviewedExercises.map((item) => (
               <div key={item.id} className="rounded-xl border p-3">
                 <p className="text-sm font-medium">{item.exerciseTitle || item.title || "Note exercise"}</p>
-                <p className="text-xs text-slate-500">
-                  Submitted by {item.studentName || item.studentId}, {item.assignmentDate}
-                </p>
+                <p className="mt-2 text-sm font-semibold text-accent">Topic: {item.topic}</p>
+                {item?.paperIds?.length > 0 && (
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      onClick={handleOpenPapers}
+                      disabled={openingPapers}
+                      className="btn-secondary inline-flex items-center gap-2"
+                    >
+                      <FileText className="h-4 w-4" />
+                      {openingPapers ? 'Opening...' : 'View Paper Used'}
+                    </button>
+                  </div>
+                )}
                 <button 
                   onClick={() => setReviewingItem(item)} 
-                  className="btn-secondary text-sm"
+                  className="btn-secondary text-sm mt-4"
                 >
-                  Review this submission
+                  Mark ✅
                 </button>
               </div>
             ))}

@@ -7,7 +7,7 @@ After editing in Codespaces and Before asking Codex
 
 git status
 git add .
-git commit -m "Added some changes and logo and then made some few adjustments. 24-03-2026."
+git commit -m "Made some UI changes on the student dashboard page and also on the login logic. 24-03-2026."
 git push origin main
 
 

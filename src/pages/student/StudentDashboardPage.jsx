@@ -272,7 +272,7 @@ export const StudentDashboardPage = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-semibold text-slate-700">{itemAvailability.label}</p>
-                    <p className="mt-1 text-xs text-slate-400">{canOpenExercise(exercise.assignmentDate) ? 'Open today' : 'Reference only'}</p>
+                    <p className="mt-1 text-xs text-slate-400">{canOpenExercise(exercise.assignmentDate) ? 'Open today' : 'Reference only ☀️'}</p>
                   </div>
                 </div>
               );

@@ -27,6 +27,7 @@ const features = [
 export const SignupPage = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const [creating, setCreating] = useState(false);
 
   const [form, setForm] = useState({
     fullName: '',
@@ -48,12 +49,22 @@ export const SignupPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!acceptedPolicies) {
-      setStatus('You must accept the Terms and Policies before creating an account.');
-      return;
-    }
+    setCreating(true);
 
-    console.log('[Examify][Signup] submit:start', form);
+    console.log('Validating form', form);
+
+    if (form.role.trim() === 'student') {
+      if (form.grade.trim() === 'Select Grade') {
+        setStatus('Please select a valid grade.');
+        setCreating(false);
+        return;
+      }
+      if (form.province.trim() === 'Select Province') {
+        setStatus('Please select a valid province.');
+        setCreating(false);
+        return;
+      }
+    }
 
     try {
       const result = await register({
@@ -71,9 +82,7 @@ export const SignupPage = () => {
           sessionType: form.role === ROLES.STUDENT ? form.sessionType : null,
         },
       });
-
-      console.log('[Examify][Signup] submit:success', result.profile);
-
+      setCreating(false);
       navigate(
         result.profile.role === ROLES.STUDENT
           ? '/student/billing'
@@ -82,6 +91,7 @@ export const SignupPage = () => {
     } catch (error) {
       console.error('[Examify][Signup] submit:error', error);
       setStatus(error.message);
+      setCreating(false);
     }
   };
 
@@ -201,8 +211,12 @@ export const SignupPage = () => {
           </div>
 
           <div className="md:col-span-2">
-            <button type="submit" className="btn-primary w-full">
-              Create account
+            <button 
+              type="submit"
+              className="btn-primary w-full"
+              disabled={(!acceptedPolicies || form.fullName.trim() === '' || form.email.trim() === '' || form.password.trim() === '' || (form.role.trim() === 'student' && form.grade.trim() === 'Select Grade') || (form.role.trim() === 'student' && form.province.trim() === 'National')) || creating}
+            >
+              {creating ? 'Creating account...' : 'Create account'}
             </button>
 
             {status ? <p className="mt-3 text-sm text-rose-600">{status}</p> : null}

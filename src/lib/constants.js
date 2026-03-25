@@ -8,6 +8,7 @@ export const ROLES = {
 export const SUBJECT = 'Mathematics';
 
 export const SOUTH_AFRICAN_GRADES = [
+  'Select Grade',
   'Grade 4',
   'Grade 5',
   'Grade 6',
@@ -35,8 +36,8 @@ export const REGIONS = [
 ];
 
 export const SESSION_PRICING = {
-  online: 250,
-  inPerson: 300,
+  online: 220,
+  inPerson: 250,
 };
 
 export const SESSION_TYPE_LABELS = {
