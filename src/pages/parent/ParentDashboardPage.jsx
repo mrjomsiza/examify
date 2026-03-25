@@ -243,6 +243,7 @@ export const ParentDashboardPage = () => {
       onLogout={logout}
     >
       <SectionHeader 
+        showLogo
         eyebrow="Linked Students" 
         title="Your Children" 
         description="Add students using their email or Examify ID. You can manage multiple students from this panel."

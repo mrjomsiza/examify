@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { Logo } from '../../components/common/Logo';
 import { BookOpen, BrainCircuit, ShieldCheck, Users } from 'lucide-react';
 
 const features = [
@@ -60,6 +61,7 @@ export const LoginPage = () => {
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-700">Login</p>
             <h2 className="mt-2 text-3xl font-bold text-slate-950">Welcome back</h2>
+            <Logo className="mt-4" />
           </div>
           <label className="block">
             <span className="label">Email</span>

@@ -286,6 +286,7 @@ export const TutorDashboardPage = () => {
       <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
         <div className="space-y-6">
           <SectionHeader
+            showLogo
             eyebrow="Students"
             title="Assigned learners"
             description="Click a student to open their report, lesson completion, reports, and completed lessons."

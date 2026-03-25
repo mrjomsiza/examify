@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { REGIONS, ROLES, SOUTH_AFRICAN_GRADES } from '../../lib/constants';
 import { useAuth } from '../../hooks/useAuth';
+import { Logo } from '../../components/common/Logo';
 import { BookOpen, BrainCircuit, ShieldCheck, Users } from 'lucide-react';
 
 const features = [
@@ -117,6 +118,7 @@ export const SignupPage = () => {
             <h2 className="mt-2 text-3xl font-bold text-slate-950">
               Create your account
             </h2>
+            <Logo className="mt-4" />
           </div>
 
           <label>
