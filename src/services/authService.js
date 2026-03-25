@@ -15,12 +15,14 @@ import { mockUsers } from '../data/mockData';
 const provider = isFirebaseConfigured ? new GoogleAuthProvider() : null;
 
 export const loginWithEmail = async ({ email, password }) => {
+  if (!auth) throw new Error('Firebase not configured. Please set up environment variables.');
   const credential = await signInWithEmailAndPassword(auth, email, password);
   const profile = await getUserProfile(credential.user.uid);
   return { user: credential.user, profile };
 };
 
 export const registerWithEmail = async ({ fullName, email, password, role, extraProfile = {} }) => {
+  if (!auth) throw new Error('Firebase not configured. Please set up environment variables.');
   const studentDefaults = role === 'student'
     ? {
       previousYearMark: Number(extraProfile.previousYearMark ?? 0),
@@ -84,6 +86,7 @@ export const markStudentPaymentComplete = async ({ uid, reference }) => {
 };
 
 export const signInWithGoogle = async () => {
+  if (!auth) throw new Error('Firebase not configured. Please set up environment variables.');
   const credential = await signInWithPopup(auth, provider);
   const profile = await getUserProfile(credential.user.uid);
   return { user: credential.user, profile };

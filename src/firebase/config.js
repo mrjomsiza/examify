@@ -21,7 +21,12 @@ export const isFirebaseConfigured = Boolean(
   firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId,
 );
 
-const app = isFirebaseConfigured ? (getApps().length ? getApp() : initializeApp(firebaseConfig)) : null;
+let app = null;
+try {
+  app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+} catch (error) {
+  console.warn('Firebase initialization failed:', error);
+}
 const aiBackend = app ? new GoogleAIBackend() : null;
 
 export const firebaseApp = app;
